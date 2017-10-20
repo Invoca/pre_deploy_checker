@@ -12,3 +12,6 @@ jira:
   ignore_commits_with_messages: ['(^|\s)merge($|\s)']  #regexp
   ignore_branches: []  #regexp
   only_branches: [] #regexp
+  deploy_types_for_repos:
+    'OwnerName/reponame': ['Web', 'RingSwitch']
+    'OwnerName/otherrepo': ['PNAPI']

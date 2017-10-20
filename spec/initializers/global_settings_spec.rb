@@ -36,7 +36,8 @@ describe 'GlobalSettings' do
         'jira' => DEFAULT_JIRA_SETTINGS.merge(
           'ancestor_branches' => { 'default' => 'master' },
           'project_keys' => ['STORY'],
-          'valid_statuses' => ['Ready to Deploy']
+          'valid_statuses' => ['Ready to Deploy'],
+          'deploy_types_for_repos' => { 'OwnerName/reponame' => ['web'] }
         )
       )
     end
@@ -100,6 +101,13 @@ describe 'GlobalSettings' do
 
       File.write(Rails.root.join('data', 'config', "settings.#{Rails.env}.yml"), @required_settings.to_yaml)
       expect { load_global_settings }.to raise_exception(InvalidSettings, /ancestor/)
+    end
+
+    it 'deploy_types_for_repos is required' do
+      @required_settings['jira'].except!('deploy_types_for_repos')
+
+      File.write(Rails.root.join('data', 'config', "settings.#{Rails.env}.yml"), @required_settings.to_yaml)
+      expect { load_global_settings }.to raise_exception(InvalidSettings, /deploy type/)
     end
 
     it 'project_keys is required' do

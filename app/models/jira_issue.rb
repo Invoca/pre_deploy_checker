@@ -28,6 +28,10 @@ class JiraIssue < ActiveRecord::Base
     commits.joins(:commits_and_pushes).where('commits_and_pushes.push_id = ?', push.id)
   end
 
+  def is_merged_in_push?(push)
+    jira_issues_and_pushes.where(push_id: push.id).merged.exists?
+  end
+
   def secrets_modified?
     secrets_modified && secrets_modified == 'Yes'
   end

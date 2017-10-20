@@ -28,6 +28,13 @@ describe 'PushManager' do
     stub_request(:get, /\/rest\/api\/2\/issue\/#{key}/).to_return(status: 200, body: response.to_json)
   end
 
+  def mock_jira_jql_response(keys)
+    response = {
+      'issues' => json_jira_issues(keys)
+    }
+    stub_request(:get, /\/rest\/api\/2\/search\?jql.*/).to_return(status: 200, body: response.to_json)
+  end
+
   it 'can create jira issues, commits, and link them together' do
     commits = [Git::TestHelpers.create_commit(sha: Git::TestHelpers.create_sha, message: 'STORY-1234 Description1'),
                Git::TestHelpers.create_commit(sha: Git::TestHelpers.create_sha, message: 'STORY-5678 Description2')]
@@ -36,6 +43,7 @@ describe 'PushManager' do
 
     ['STORY-1234', 'STORY-5678'].each do |key|
       mock_jira_find_issue_response(key)
+      mock_jira_jql_response([])
     end
     push = PushManager.process_push!(Push.create_from_github_data!(payload))
     expect(push.commits.count).to eq(2)
@@ -53,12 +61,13 @@ describe 'PushManager' do
     expect(push.jira_issues[1].commits[0].sha).to eq(commits[1].sha)
   end
 
-  context 'detect jira_issue issues' do
+  context 'detect jira_issue errors' do
     context 'with commits' do
       before do
         expect_any_instance_of(Git::Git).to receive(:clone_repository)
         expect_any_instance_of(Git::Git).to \
           receive(:commit_diff_refs).and_return([Git::TestHelpers.create_commit(message: 'STORY-1234 Description')])
+        mock_jira_jql_response([])
       end
 
       it 'in the wrong state' do
@@ -111,11 +120,43 @@ describe 'PushManager' do
       end
     end
 
+    context 'without commits' do
+      before do
+        expect_any_instance_of(Git::Git).to receive(:clone_repository)
+        expect_any_instance_of(Git::Git).to receive(:commit_diff_refs).and_return([])
+        mock_jira_jql_response(['STORY-1234'])
+      end
+
+      it 'for this push, but had commits before' do
+        other_push = create_test_push(sha: Git::TestHelpers.create_sha)
+        commit = GitModels::TestHelpers.create_commit(sha: Git::TestHelpers.create_sha)
+        CommitsAndPushes.create_or_update!(commit, other_push)
+
+        issue = create_test_jira_issue(key: 'STORY-1234')
+        issue.commits << commit
+        issue.save!
+        JiraIssuesAndPushes.create_or_update!(issue, other_push)
+
+        push = PushManager.process_push!(Push.create_from_github_data!(payload))
+        # we don't treat merged issues missing commits as a problem
+        expect(push.jira_issues_and_pushes.first.merged).to be_truthy
+        expect(push.jira_issues_and_pushes.first.error_list).to match_array([])
+        expect(push.jira_issues_and_pushes.first.jira_issue.commits).not_to be_empty
+      end
+
+      it 'for this push, and never had commits before' do
+        push = PushManager.process_push!(Push.create_from_github_data!(payload))
+        expect(push.jira_issues_and_pushes.first.error_list).to match_array([JiraIssuesAndPushes::ERROR_NO_COMMITS])
+        expect(push.jira_issues_and_pushes.first.jira_issue.commits).to be_empty
+      end
+    end
+
     context 'when merged' do
       before do
         allow_any_instance_of(Git::Git).to receive(:clone_repository)
         allow_any_instance_of(Git::Git).to \
           receive(:commit_diff_refs).and_return([Git::TestHelpers.create_commit(message: 'STORY-1234 Description')])
+        mock_jira_jql_response([])
       end
 
       it 'ignores all errors' do
@@ -140,8 +181,12 @@ describe 'PushManager' do
   end
 
   context 'detect commit issues' do
+    before do
+      mock_jira_jql_response([])
+    end
+
     it 'without a matching JIRA issue' do
-      stub_request(:get, /.*STORY-1234/).to_return(status: 404, body: 'Not Found')
+      stub_request(:get, /.*issue\/STORY-1234/).to_return(status: 404, body: 'Not Found')
       expect_any_instance_of(Git::Git).to receive(:clone_repository)
       expect_any_instance_of(Git::Git).to \
         receive(:commit_diff_refs).and_return([Git::TestHelpers.create_commit(message: 'STORY-1234 Description')])
@@ -163,6 +208,7 @@ describe 'PushManager' do
   end
 
   it 'ignore commits with matching messages, regardless of case' do
+    mock_jira_jql_response([])
     GlobalSettings.jira.ignore_commits_with_messages = ['.*ignore1.*', '.*ignore2.*']
     commits = [Git::TestHelpers.create_commit(sha: Git::TestHelpers.create_sha, message: '--Ignore1--'),
                Git::TestHelpers.create_commit(sha: Git::TestHelpers.create_sha, message: '--Ignore2--'),
@@ -176,6 +222,7 @@ describe 'PushManager' do
 
   it 'can handle commits with multiple issue numbers' do
     mock_jira_find_issue_response('STORY-1234')
+    mock_jira_jql_response([])
     expect_any_instance_of(Git::Git).to receive(:clone_repository)
     expect_any_instance_of(Git::Git).to \
       receive(:commit_diff_refs).and_return(
@@ -188,6 +235,7 @@ describe 'PushManager' do
 
   it 'can handle unclean issue numbers' do
     mock_jira_find_issue_response('STORY-1234')
+    mock_jira_jql_response([])
     messages = [
       'STORY-1234',
       'STORY_1234',
@@ -226,6 +274,7 @@ describe 'PushManager' do
       allow_any_instance_of(Git::Git).to receive(:clone_repository)
       allow_any_instance_of(Git::Git).to \
         receive(:commit_diff_refs).and_return([Git::TestHelpers.create_commit(message: 'STORY-1234 Description')])
+      mock_jira_jql_response([])
     end
 
     context 'has a failure status' do
@@ -286,6 +335,7 @@ describe 'PushManager' do
       @commits = [Git::TestHelpers.create_commit(sha: Git::TestHelpers.create_sha, message: 'STORY-1234 Description'),
                   Git::TestHelpers.create_commit(sha: Git::TestHelpers.create_sha, message: 'STORY-5678 Description')]
       allow_any_instance_of(Git::Git).to receive(:clone_repository).with(anything)
+      mock_jira_jql_response([])
     end
 
     it 'commits' do
@@ -300,30 +350,51 @@ describe 'PushManager' do
       expect(push.commits.count).to eq(1)
       expect(push.commits[0].sha).to eq(@commits[1].sha)
     end
+  end
 
-    it 'jira issues' do
-      mock_jira_find_issue_response('STORY-1234', post_deploy_check_status: 'Ready to Run')
-      mock_jira_find_issue_response('STORY-5678')
-      allow_any_instance_of(Git::Git).to receive(:commit_diff_refs).and_return([@commits[0], @commits[1]])
-      push = PushManager.process_push!(Push.create_from_github_data!(payload))
-      expect(push.jira_issues_and_pushes.merged.count).to eq(0)
-      expect(push.jira_issues_and_pushes.not_merged.count).to eq(2)
-      expect(push.jira_issues_and_pushes.not_merged[0].jira_issue.key).to eq('STORY-1234')
-      expect(push.jira_issues_and_pushes.not_merged[0].jira_issue.post_deploy_check_status).to eq('Ready to Run')
+  it 'treats jira issues with old commits as merged and no commits as not merged' do
+    @commits = [Git::TestHelpers.create_commit(sha: Git::TestHelpers.create_sha, message: 'STORY-1234 Description'),
+                Git::TestHelpers.create_commit(sha: Git::TestHelpers.create_sha, message: 'STORY-5678 Description')]
+    allow_any_instance_of(Git::Git).to receive(:clone_repository).with(anything)
+    mock_jira_jql_response(['STORY-9999'])
 
-      # we still check the status of merged issues, so we must mock the lookup for STORY-1234
-      mock_jira_find_issue_response('STORY-1234', post_deploy_check_status: 'Not Needed')
-      mock_jira_find_issue_response('STORY-5678')
-      allow_any_instance_of(Git::Git).to receive(:commit_diff_refs).and_return([@commits[1]])
-      push = PushManager.process_push!(push)
-      expect(push.jira_issues_and_pushes.merged.count).to eq(1)
-      expect(push.jira_issues_and_pushes.merged[0].jira_issue.post_deploy_check_status).to eq('Not Needed')
-      expect(push.jira_issues_and_pushes.not_merged.count).to eq(1)
-      expect(push.jira_issues_and_pushes.not_merged[0].jira_issue.key).to eq('STORY-5678')
-    end
+    # setup the push with two issues that have commits in the push, and one that has no commits
+    mock_jira_find_issue_response('STORY-1234', post_deploy_check_status: 'Ready to Run')
+    mock_jira_find_issue_response('STORY-5678')
+    mock_jira_find_issue_response('STORY-9999')
+    allow_any_instance_of(Git::Git).to receive(:commit_diff_refs).and_return([@commits[0], @commits[1]])
+    push = PushManager.process_push!(Push.create_from_github_data!(payload))
+
+    expect(push.jira_issues_and_pushes.merged.count).to eq(0)
+
+    expect(push.jira_issues_and_pushes.not_merged.count).to eq(3)
+    expect(push.jira_issues_and_pushes.not_merged[0].jira_issue.key).to eq('STORY-1234')
+    expect(push.jira_issues_and_pushes.not_merged[0].jira_issue.post_deploy_check_status).to eq('Ready to Run')
+    expect(push.jira_issues_and_pushes.not_merged[1].jira_issue.key).to eq('STORY-5678')
+    expect(push.jira_issues_and_pushes.not_merged[2].jira_issue.key).to eq('STORY-9999')
+
+    # update the push with one issue that has commits in the push, one issue that had commits, but don't any more, and one that never had any commits
+    # we also change the post_deploy_check_status of the merged issue to confirm that we update merged issues
+    mock_jira_find_issue_response('STORY-1234', post_deploy_check_status: 'Complete')
+    mock_jira_find_issue_response('STORY-5678')
+    mock_jira_find_issue_response('STORY-9999')
+    allow_any_instance_of(Git::Git).to receive(:commit_diff_refs).and_return([@commits[1]])
+    push = PushManager.process_push!(push)
+
+    expect(push.jira_issues_and_pushes.merged.count).to eq(1)
+    expect(push.jira_issues_and_pushes.merged[0].jira_issue.key).to eq('STORY-1234')
+    expect(push.jira_issues_and_pushes.merged[0].jira_issue.post_deploy_check_status).to eq('Complete')
+
+    expect(push.jira_issues_and_pushes.not_merged.count).to eq(2)
+    expect(push.jira_issues_and_pushes.not_merged[0].jira_issue.key).to eq('STORY-5678')
+    expect(push.jira_issues_and_pushes.not_merged[1].jira_issue.key).to eq('STORY-9999')
   end
 
   context 'uses appropriate ancestor branch' do
+    before do
+      mock_jira_jql_response([])
+    end
+
     it 'for default' do
       expect_any_instance_of(Git::Git).to receive(:clone_repository).with('default_ancestor')
       GlobalSettings.jira.ancestor_branches['default'] = 'default_ancestor'

@@ -17,6 +17,13 @@ class PushManager
       Rails.logger.info("Getting #{all_issue_keys.length} JIRA issues for push id #{push.id}")
       jira_issues = get_jira_issues!(all_issue_keys)
 
+      # get issues from JIRA that should have been in the commits, but were not
+      unrelated_jira_issues = get_other_jira_issues_in_valid_states(push, all_issue_keys)
+      Rails.logger.info(
+        "Found #{unrelated_jira_issues.length} JIRA issues that are in valid states but not in push id #{push.id}"
+      )
+      jira_issues += unrelated_jira_issues
+
       link_commits_to_jira_issues(jira_issues, commits)
 
       link_jira_issues_to_push(push, jira_issues)
@@ -24,9 +31,9 @@ class PushManager
       # destroy relationship to commits that are no longer in the push
       CommitsAndPushes.destroy_if_commit_not_in_list(push, commits)
 
-      # assume that issues no longer found in the commits have been merged to the ancestor branch
-      jira_issues_from_commits = jira_issues.select { |j| issue_keys_from_commits.include?(j.key) }
-      JiraIssuesAndPushes.mark_as_merged_if_jira_issue_not_in_list(push, jira_issues_from_commits)
+      # assume that issues that have commits related to them, but are no longer found in the commits for this push, have been merged to the ancestor branch
+      merged_jira_issues = jira_issues.select { |j| !issue_keys_from_commits.include?(j.key) && j.commits.any? }
+      JiraIssuesAndPushes.mark_as_merged(push, merged_jira_issues)
 
       push.reload
 
@@ -85,6 +92,26 @@ class PushManager
       end.compact
     end
 
+    # how to prevent shipped pushes from picking up issues that are not in the branch!?!
+    # targeted deploy date?
+    # don't poll for issues with no commits when the branch contains no commits?
+    def get_other_jira_issues_in_valid_states(push, issue_keys)
+      quoted_statuses = GlobalSettings.jira.valid_statuses.map do |status|
+        "\"#{status}\""
+      end
+      jql = "status IN (#{quoted_statuses.join(', ')}) " \
+            "AND project IN (#{GlobalSettings.jira.project_keys.join(', ').upcase}) " \
+            "AND customfield_12501 IN (#{GlobalSettings.jira.deploy_types_for_repos[push.branch.repository.name].join(', ')})"
+
+      if issue_keys.any?
+        jql += " AND key NOT IN (#{issue_keys.join(', ')})"
+      end
+      jira_client = JIRA::ClientWrapper.new(Rails.application.secrets.jira)
+      jira_client.find_issues_by_jql(jql).collect do |issue|
+        JiraIssue.create_from_jira_data!(issue)
+      end.compact
+    end
+
     def link_commits_to_jira_issues(jira_issues, commits)
       jira_issues.each do |jira_issue|
         commits.each do |commit|
@@ -127,7 +154,7 @@ class PushManager
         errors << JiraIssuesAndPushes::ERROR_POST_DEPLOY_CHECK_STATUS
       end
 
-      if jira_issue.commits_for_push(push).empty?
+      if jira_issue.commits_for_push(push).empty? && !jira_issue.is_merged_in_push?(push)
         errors << JiraIssuesAndPushes::ERROR_NO_COMMITS
       end
 

@@ -16,7 +16,8 @@ DEFAULT_JIRA_SETTINGS = {
   ignore_commits_with_messages: [],
   ignore_branches: [],
   only_branches: [],
-  ancestor_branches: {}
+  ancestor_branches: {},
+  deploy_types_for_repos: {}
 }.freeze
 
 class InvalidSettings < StandardError; end
@@ -68,6 +69,14 @@ def validate_jira_settings(settings)
   settings.ancestor_branches.each do |branch, ancestor_branch|
     if ancestor_branch.blank?
       raise InvalidSettings, "Must specify an ancestor branch for #{branch}"
+    end
+  end
+  if settings.deploy_types_for_repos.empty?
+    raise InvalidSettings, 'Must specify at least one JIRA deploy type repository mapping'
+  end
+  settings.deploy_types_for_repos.each do |repo, deploy_types|
+    if deploy_types.blank?
+      raise InvalidSettings, "Must specify at least one deploy type for repository #{repo}"
     end
   end
 end
