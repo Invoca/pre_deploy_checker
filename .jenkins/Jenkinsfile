@@ -19,14 +19,14 @@ pipeline {
       steps {
         updateGitHubStatus('clean-build', 'pending', 'Unit tests.')
         script {
-          sh 'bundle exec rspec --format RspecJunitFormatter --out spec/reports/rspec.xml'
+          sh 'bundle install'
         }
       }
     }
     stage('Unit Test') {
       steps {
         script {
-          sh 'bundle exec rake'
+          sh 'bundle exec rspec --format RspecJunitFormatter --out spec/reports/rspec.xml'
         }
       }
       post {
