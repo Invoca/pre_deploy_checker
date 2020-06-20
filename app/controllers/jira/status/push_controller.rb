@@ -112,7 +112,7 @@ module Jira
       def deploy_reps
         reps = Hash.new(0).tap do |hash|
           @push.unmerged_jira_issues.map do |jira_issue|
-            name = jira_issue.assignee._?.name || 'Unknown'
+            name = jira_issue.assignee&.name || 'Unknown'
             hash[name] += 1
           end
         end

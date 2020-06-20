@@ -80,7 +80,7 @@
       <%else%>
         <td class="<%=error_class_if_error_present(jira_issue_and_push, [JiraIssuesAndPushes::ERROR_NO_COMMITS])%>"><%=jira_issue_and_push.commits.count%></td>
       <%end%>
-      <td nowrap><%=jira_issue.assignee._?.name%></td>
+      <td nowrap><%=jira_issue.assignee&.name%></td>
       <td nowrap><%=jira_issue.deploy_type%></td>
       <td nowrap class="<%=error_class_if_error_present(jira_issue_and_push, [JiraIssuesAndPushes::ERROR_WRONG_STATE])%>"><%=jira_issue.status%></td>
       <td nowrap class="<%=error_class_if_error_present(jira_issue_and_push, [JiraIssuesAndPushes::ERROR_POST_DEPLOY_CHECK_STATUS])%>"><%=jira_issue.post_deploy_check_status || '&mdash;'.html_safe%></td>

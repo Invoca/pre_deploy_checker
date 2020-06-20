@@ -18,6 +18,7 @@ module JIRA
     end
 
     def find_issue_by_key(key)
+      key or raise ArgumentError "invalid falsey key #{key.inspect}"
       self.Issue.find(key)
     rescue JIRA::HTTPError => ex
       if ex.response.code == '404'

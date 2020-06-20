@@ -10,9 +10,9 @@ class Push < ActiveRecord::Base
   validates :status, inclusion: Github::Api::Status::STATES.map(&:to_s)
 
   belongs_to :head_commit, class_name: 'Commit', required: true
-  has_many :commits_and_pushes, class_name: :CommitsAndPushes, inverse_of: :push, dependent: :destroy
+  has_many :commits_and_pushes, class_name: 'CommitsAndPushes', inverse_of: :push, dependent: :destroy
   has_many :commits, through: :commits_and_pushes
-  has_many :jira_issues_and_pushes, class_name: :JiraIssuesAndPushes, inverse_of: :push, dependent: :destroy
+  has_many :jira_issues_and_pushes, class_name: 'JiraIssuesAndPushes', inverse_of: :push, dependent: :destroy
   has_many :jira_issues, through: :jira_issues_and_pushes
   belongs_to :branch, inverse_of: :pushes, required: true
 

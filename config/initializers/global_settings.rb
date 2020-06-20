@@ -29,7 +29,7 @@ end
 def validate_common_settings(settings)
   return if skip_validations
 
-  unless settings.jira._?.any?
+  unless settings&.any?
     raise InvalidSettings,
           'Must specify jira settings'
   end
@@ -39,38 +39,38 @@ def validate_common_settings(settings)
   end
 end
 
-def validate_jira_settings(settings)
+def validate_jira_settings(jira_settings)
   return if skip_validations
 
-  if Rails.application.secrets.jira['site'].blank?
+  if jira_settings['site'].blank?
     raise InvalidSettings, 'Must specify JIRA site URL'
   end
-  if Rails.application.secrets.jira['consumer_key'].blank?
+  if jira_settings['consumer_key'].blank?
     raise InvalidSettings, 'Must specify JIRA consumer key'
   end
-  if Rails.application.secrets.jira['access_token'].blank?
+  if jira_settings['access_token'].blank?
     raise InvalidSettings, 'Must specify JIRA access token'
   end
-  if Rails.application.secrets.jira['access_key'].blank?
+  if jira_settings['access_key'].blank?
     raise InvalidSettings, 'Must specify JIRA access key'
   end
-  if Rails.application.secrets.jira['private_key_file'].blank?
+  if jira_settings['private_key_file'].blank?
     raise InvalidSettings, 'Must specify JIRA private key file name'
   end
-  if settings.project_keys.empty?
+  if jira_settings.project_keys.empty?
     raise InvalidSettings, 'Must specify at least one JIRA project key'
   end
-  if settings.ancestor_branches.empty?
+  if jira_settings.ancestor_branches.empty?
     raise InvalidSettings, 'Must specify at least one JIRA ancestor branch mapping'
   end
-  if settings.valid_statuses.empty?
+  if jira_settings.valid_statuses.empty?
     raise InvalidSettings, 'Must specify at least one valid JIRA status'
   end
-  if settings.valid_sub_task_statuses.empty?
+  if jira_settings.valid_sub_task_statuses.empty?
     raise InvalidSettings, 'Must specify at least one valid JIRA sub-task status'
   end
 
-  settings.ancestor_branches.each do |branch, ancestor_branch|
+  jira_settings.ancestor_branches.each do |branch, ancestor_branch|
     if ancestor_branch.blank?
       raise InvalidSettings, "Must specify an ancestor branch for #{branch}"
     end
