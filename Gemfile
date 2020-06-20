@@ -54,7 +54,7 @@ gem 'git_models', '~> 2.0', path: '../git_models'
 gem 'hobo_fields', '~> 3.0', path: '../hobo_fields'
 gem 'delayed_job_active_record'
 gem 'daemons'
-gem 'jira-ruby', require: 'jira'
+gem 'jira-ruby', require: 'jira-ruby'
 gem 'pry'
 
 gem 'invoca_secrets', source: 'https://gem.fury.io/invoca'
