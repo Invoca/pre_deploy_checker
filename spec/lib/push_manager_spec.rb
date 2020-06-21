@@ -35,7 +35,7 @@ describe 'PushManager' do
     ['STORY-1234', 'STORY-5678'].each do |key|
       mock_jira_find_issue_response(key)
     end
-    push = PushManager.process_push!(Push.create_from_github_data!(payload))
+    push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
     expect(push.commits.count).to eq(2)
     expect(push.commits[0].sha).to eq(commits[0].sha)
     expect(push.commits[1].sha).to eq(commits[1].sha)
@@ -61,28 +61,28 @@ describe 'PushManager' do
 
       it 'in the wrong state' do
         mock_jira_find_issue_response('STORY-1234', status: 'Wrong State')
-        push = PushManager.process_push!(Push.create_from_github_data!(payload))
+        push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
         expect(push.jira_issues_and_pushes.first.error_list).to \
           match_array([JiraIssuesAndPushes::ERROR_WRONG_STATE])
       end
 
       it 'with the wrong post deploy check status' do
         mock_jira_find_issue_response('STORY-1234', post_deploy_check_status: 'Wrong Status')
-        push = PushManager.process_push!(Push.create_from_github_data!(payload))
+        push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
         expect(push.jira_issues_and_pushes.first.error_list).to \
           match_array([JiraIssuesAndPushes::ERROR_POST_DEPLOY_CHECK_STATUS])
       end
 
       it 'with no post deploy check status' do
         mock_jira_find_issue_response('STORY-1234', post_deploy_check_status: nil)
-        push = PushManager.process_push!(Push.create_from_github_data!(payload))
+        push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
         expect(push.jira_issues_and_pushes.first.error_list).to \
           match_array([JiraIssuesAndPushes::ERROR_POST_DEPLOY_CHECK_STATUS])
       end
 
       it 'with a blank migration field' do
         mock_jira_find_issue_response('STORY-1234', long_running_migration: nil)
-        push = PushManager.process_push!(Push.create_from_github_data!(payload))
+        push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
         expect(push.jira_issues_and_pushes.first.error_list).to \
           match_array([JiraIssuesAndPushes::ERROR_BLANK_LONG_RUNNING_MIGRATION])
       end
@@ -103,7 +103,7 @@ describe 'PushManager' do
           post_deploy_check_status: nil,
           long_running_migration: nil
         )
-        push = PushManager.process_push!(Push.create_from_github_data!(payload))
+        push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
         expect(push.jira_issues_and_pushes.first.error_list).to \
           match_array([JiraIssuesAndPushes::ERROR_WRONG_STATE])
       end
@@ -119,7 +119,7 @@ describe 'PushManager' do
           post_deploy_check_status: nil,
           long_running_migration: nil
         )
-        push = PushManager.process_push!(Push.create_from_github_data!(payload))
+        push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
         expect(push.jira_issues_and_pushes.first.error_list).to \
           match_array([])
       end
@@ -135,7 +135,7 @@ describe 'PushManager' do
       it 'ignores all errors' do
         mock_jira_find_issue_response('STORY-1234', status: 'Wrong State', post_deploy_check_status: nil)
 
-        push = PushManager.process_push!(Push.create_from_github_data!(payload))
+        push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
         jira_issue_and_push = push.jira_issues_and_pushes.first
         expect(jira_issue_and_push.error_list).to \
           match_array([JiraIssuesAndPushes::ERROR_WRONG_STATE, JiraIssuesAndPushes::ERROR_POST_DEPLOY_CHECK_STATUS])
@@ -145,7 +145,7 @@ describe 'PushManager' do
         jira_issue_and_push.save
 
         # the error should be cleared
-        push = PushManager.process_push!(Push.create_from_github_data!(payload))
+        push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
         jira_issue_and_push = push.jira_issues_and_pushes.first
         expect(jira_issue_and_push.error_list).to \
           match_array([])
@@ -159,7 +159,7 @@ describe 'PushManager' do
       expect_any_instance_of(Git::Git).to receive(:clone_repository)
       expect_any_instance_of(Git::Git).to \
         receive(:commit_diff_refs).and_return([Git::TestHelpers.create_commit(message: 'STORY-1234 Description')])
-      push = PushManager.process_push!(Push.create_from_github_data!(payload))
+      push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
       expect(push.commits_and_pushes.first.error_list).to \
         match_array([CommitsAndPushes::ERROR_ORPHAN_JIRA_ISSUE_NOT_FOUND])
     end
@@ -170,7 +170,7 @@ describe 'PushManager' do
         receive(:commit_diff_refs).and_return(
           [Git::TestHelpers.create_commit(message: 'Description with issue number')]
         )
-      push = PushManager.process_push!(Push.create_from_github_data!(payload))
+      push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
       expect(push.commits_and_pushes.first.error_list).to \
         match_array([CommitsAndPushes::ERROR_ORPHAN_NO_JIRA_ISSUE_NUMBER])
       expect(push.commits_and_pushes.first.no_jira).to eq(false)
@@ -182,7 +182,7 @@ describe 'PushManager' do
         [Git::TestHelpers.create_commit(message: 'no_jira: abc 123')]
       }
 
-      push = PushManager.process_push!(Push.create_from_github_data!(payload))
+      push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
       expect(push.commits_and_pushes.first.error_list).to match_array([])
       expect(push.commits_and_pushes.first.no_jira).to eq(true)
     end
@@ -202,7 +202,7 @@ describe 'PushManager' do
                Git::TestHelpers.create_commit(sha: Git::TestHelpers.create_sha, message: 'KeepMe')]
     expect_any_instance_of(Git::Git).to receive(:clone_repository)
     expect_any_instance_of(Git::Git).to receive(:commit_diff_refs).and_return(commits)
-    push = PushManager.process_push!(Push.create_from_github_data!(payload))
+    push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
     expect(push.commits.count).to eq(1)
     expect(push.commits.first.sha).to eq(commits[2].sha)
   end
@@ -214,7 +214,7 @@ describe 'PushManager' do
       receive(:commit_diff_refs).and_return(
         [Git::TestHelpers.create_commit(message: 'STORY-1234 description STORY-5678')]
       )
-    push = PushManager.process_push!(Push.create_from_github_data!(payload))
+    push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
     expect(push.jira_issues.count).to eq(1)
     expect(push.jira_issues.first.key).to eq('STORY-1234')
   end
@@ -247,7 +247,7 @@ describe 'PushManager' do
     end
     expect_any_instance_of(Git::Git).to receive(:clone_repository)
     expect_any_instance_of(Git::Git).to receive(:commit_diff_refs).and_return(commits)
-    push = PushManager.process_push!(Push.create_from_github_data!(payload))
+    push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
     expect(push.commits.count).to eq(19)
     push.commits.each do |commit|
       expect(commit.jira_issue.key).to eq('STORY-1234')
@@ -264,13 +264,13 @@ describe 'PushManager' do
     context 'has a failure status' do
       it 'when there is a jira error' do
         mock_jira_find_issue_response('STORY-1234', long_running_migration: nil)
-        push = PushManager.process_push!(Push.create_from_github_data!(payload))
+        push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
         expect(push.status).to eq('failure')
       end
 
       it 'when there is a commit error' do
         stub_request(:get, /\/rest\/api\/2\/issue\/STORY-1234/).to_return(status: 404, body: 'Not Found')
-        push = PushManager.process_push!(Push.create_from_github_data!(payload))
+        push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
         expect(push.status).to eq('failure')
       end
     end
@@ -278,37 +278,37 @@ describe 'PushManager' do
     context 'has a success status' do
       it 'when there are no errors' do
         mock_jira_find_issue_response('STORY-1234')
-        push = PushManager.process_push!(Push.create_from_github_data!(payload))
+        push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
         expect(push.status).to eq('success')
       end
 
       it 'when there are no commits' do
         expect_any_instance_of(Git::Git).to receive(:clone_repository)
         expect_any_instance_of(Git::Git).to receive(:commit_diff_refs).and_return([])
-        push = PushManager.process_push!(Push.create_from_github_data!(payload))
+        push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
         expect(push.commits.count).to eq(0)
         expect(push.status).to eq('success')
       end
 
       it 'when there is an accepted jira error' do
         mock_jira_find_issue_response('STORY-1234', long_running_migration: nil)
-        push = PushManager.process_push!(Push.create_from_github_data!(payload))
+        push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
         expect(push.status).to eq('failure')
         record = push.jira_issues_and_pushes.first
         record.ignore_errors = true
         record.save!
-        push = PushManager.process_push!(push)
+        push = PushManager.process_push!(jira_client, push)
         expect(push.status).to eq('success')
       end
 
       it 'when there is an accepted commit error' do
         stub_request(:get, /\/rest\/api\/2\/issue\/STORY-1234/).to_return(status: 404, body: 'Not Found')
-        push = PushManager.process_push!(Push.create_from_github_data!(payload))
+        push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
         expect(push.status).to eq('failure')
         record = push.commits_and_pushes.first
         record.ignore_errors = true
         record.save!
-        push = PushManager.process_push!(push)
+        push = PushManager.process_push!(jira_client, push)
         expect(push.status).to eq('success')
       end
     end
@@ -324,12 +324,12 @@ describe 'PushManager' do
     it 'commits' do
       stub_request(:get, /\/rest\/api\/2\/issue\/.*/).to_return(status: 404, body: 'Not Found')
       allow_any_instance_of(Git::Git).to receive(:commit_diff_refs).and_return([@commits[0], @commits[1]])
-      push = PushManager.process_push!(Push.create_from_github_data!(payload))
+      push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
       expect(push.commits.count).to eq(2)
       expect(push.commits[0].sha).to eq(@commits[0].sha)
 
       allow_any_instance_of(Git::Git).to receive(:commit_diff_refs).and_return([@commits[1]])
-      push = PushManager.process_push!(push)
+      push = PushManager.process_push!(jira_client, push)
       expect(push.commits.count).to eq(1)
       expect(push.commits[0].sha).to eq(@commits[1].sha)
     end
@@ -338,7 +338,7 @@ describe 'PushManager' do
       mock_jira_find_issue_response('STORY-1234', post_deploy_check_status: 'Ready to Run')
       mock_jira_find_issue_response('STORY-5678')
       allow_any_instance_of(Git::Git).to receive(:commit_diff_refs).and_return([@commits[0], @commits[1]])
-      push = PushManager.process_push!(Push.create_from_github_data!(payload))
+      push = PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
       expect(push.jira_issues_and_pushes.merged.count).to eq(0)
       expect(push.jira_issues_and_pushes.not_merged.count).to eq(2)
       expect(push.jira_issues_and_pushes.not_merged[0].jira_issue.key).to eq('STORY-1234')
@@ -348,7 +348,7 @@ describe 'PushManager' do
       mock_jira_find_issue_response('STORY-1234', post_deploy_check_status: 'Not Needed')
       mock_jira_find_issue_response('STORY-5678')
       allow_any_instance_of(Git::Git).to receive(:commit_diff_refs).and_return([@commits[1]])
-      push = PushManager.process_push!(push)
+      push = PushManager.process_push!(jira_client, push)
       expect(push.jira_issues_and_pushes.merged.count).to eq(1)
       expect(push.jira_issues_and_pushes.merged[0].jira_issue.post_deploy_check_status).to eq('Not Needed')
       expect(push.jira_issues_and_pushes.not_merged.count).to eq(1)
@@ -362,7 +362,7 @@ describe 'PushManager' do
       GlobalSettings.jira.ancestor_branches['default'] = 'default_ancestor'
       expect_any_instance_of(Git::Git).to \
         receive(:commit_diff_refs).with(anything, 'default_ancestor', anything).and_return([])
-      PushManager.process_push!(Push.create_from_github_data!(payload))
+      PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
     end
 
     it 'for match' do
@@ -370,7 +370,7 @@ describe 'PushManager' do
       GlobalSettings.jira.ancestor_branches['test/branch_name'] = 'mybranch_ancestor'
       expect_any_instance_of(Git::Git).to \
         receive(:commit_diff_refs).with(anything, 'mybranch_ancestor', anything).and_return([])
-      PushManager.process_push!(Push.create_from_github_data!(payload))
+      PushManager.process_push!(jira_client, Push.create_from_github_data!(payload))
     end
   end
 end

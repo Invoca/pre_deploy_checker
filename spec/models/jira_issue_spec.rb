@@ -2,11 +2,11 @@ require 'spec_helper'
 
 describe 'JiraIssue' do
   def jira_issue
-    @jira_issue ||= JIRA::Resource::IssueFactory.new(nil).build(load_json_fixture('jira_issue_response'))
+    @jira_issue ||= JIRA::Resource::IssueFactory.new(jira_client).build(load_json_fixture('jira_issue_response'))
   end
 
   def jira_sub_task
-    @jira_sub_task ||= JIRA::Resource::IssueFactory.new(nil).build(load_json_fixture('jira_sub_task_response'))
+    @jira_sub_task ||= JIRA::Resource::IssueFactory.new(jira_client).build(load_json_fixture('jira_sub_task_response'))
   end
 
   def assert_issue_properly_constructed(issue)
@@ -26,7 +26,7 @@ describe 'JiraIssue' do
 
   context 'construction' do
     it 'can be constructed and saved from jira data' do
-      issue = JiraIssue.create_from_jira_data!(jira_issue)
+      issue = JiraIssue.create_from_jira_data!(jira_client, jira_issue)
       assert_issue_properly_constructed(issue)
       expect(issue.new_record?).to be_falsey
       expect(issue.created_at).not_to be_nil
@@ -34,7 +34,7 @@ describe 'JiraIssue' do
     end
 
     it 'can be constructed from jira data' do
-      issue = JiraIssue.create_from_jira_data(jira_issue)
+      issue = JiraIssue.create_from_jira_data(jira_client, jira_issue)
       assert_issue_properly_constructed(issue)
       expect(issue.new_record?).to be_truthy
       expect(issue.created_at).to be_nil
@@ -43,10 +43,10 @@ describe 'JiraIssue' do
   end
 
   it 'does not create duplicate database records' do
-    JiraIssue.create_from_jira_data!(jira_issue)
+    JiraIssue.create_from_jira_data!(jira_client, jira_issue)
     expect(JiraIssue.all.count).to eq(1)
 
-    JiraIssue.create_from_jira_data!(jira_issue)
+    JiraIssue.create_from_jira_data!(jira_client, jira_issue)
     expect(JiraIssue.all.count).to eq(1)
   end
 
@@ -58,16 +58,16 @@ describe 'JiraIssue' do
     it 'can be nil' do
       issue_json = load_json_fixture('jira_issue_response')
       issue_json['fields']['assignee'] = nil
-      issue = JiraIssue.create_from_jira_data!(JIRA::Resource::IssueFactory.new(nil).build(issue_json))
+      issue = JiraIssue.create_from_jira_data!(jira_client, JIRA::Resource::IssueFactory.new(jira_client).build(issue_json))
       expect(issue.assignee).to be_nil
     end
 
     it 'can be changed' do
-      orginal_issue = JiraIssue.create_from_jira_data!(jira_issue)
+      orginal_issue = JiraIssue.create_from_jira_data!(jira_client, jira_issue)
 
       jira_issue.assignee.attrs['displayName'] = 'Other User'
 
-      updated_issue = JiraIssue.create_from_jira_data!(jira_issue)
+      updated_issue = JiraIssue.create_from_jira_data!(jira_client, jira_issue)
 
       expect(User.count).to eq(2)
       expect(orginal_issue.assignee.id).not_to eq(updated_issue.assignee.id)
@@ -77,7 +77,7 @@ describe 'JiraIssue' do
 
   context 'commits' do
     it 'can own some' do
-      issue = JiraIssue.create_from_jira_data!(jira_issue)
+      issue = JiraIssue.create_from_jira_data!(jira_client, jira_issue)
       expect(issue.commits.count).to eq(0)
       GitModels::TestHelpers.create_commits.each do |commit|
         commit.jira_issue = issue
@@ -88,7 +88,7 @@ describe 'JiraIssue' do
     end
 
     it 'can find the latest' do
-      issue = JiraIssue.create_from_jira_data!(jira_issue)
+      issue = JiraIssue.create_from_jira_data!(jira_client, jira_issue)
       expect(issue.commits.count).to eq(0)
       GitModels::TestHelpers.create_commits.each do |commit|
         # TODO: when commit dates are added, improve this test
@@ -102,7 +102,7 @@ describe 'JiraIssue' do
 
   context 'pushes' do
     before do
-      @issue = JiraIssue.create_from_jira_data!(jira_issue)
+      @issue = JiraIssue.create_from_jira_data!(jira_client, jira_issue)
       @push = create_test_push
       expect(@issue.pushes.count).to eq(0)
     end
@@ -118,7 +118,7 @@ describe 'JiraIssue' do
 
   context 'subtask parent' do
     it 'gets created if it does not exist' do
-      child_issue = JiraIssue.create_from_jira_data!(jira_sub_task)
+      child_issue = JiraIssue.create_from_jira_data!(jira_client, jira_sub_task)
       expect(child_issue.key).to eq('STORY-4240')
       expect(child_issue.parent_issue.key).to eq('STORY-4380')
       expect(child_issue.sub_task?).to be_truthy
@@ -127,8 +127,8 @@ describe 'JiraIssue' do
 
     it 'uses parent if it exists' do
       # create the parent issue for the child to be related to
-      parent_issue = JiraIssue.create_from_jira_data!(jira_issue)
-      child_issue = JiraIssue.create_from_jira_data!(jira_sub_task)
+      parent_issue = JiraIssue.create_from_jira_data!(jira_client, jira_issue)
+      child_issue = JiraIssue.create_from_jira_data!(jira_client, jira_sub_task)
       expect(child_issue.key).to eq('STORY-4240')
       expect(child_issue.parent_issue.key).to eq('STORY-4380')
       expect(child_issue.parent_issue).to eq(parent_issue)
@@ -136,11 +136,11 @@ describe 'JiraIssue' do
     end
 
     it 'can be changed' do
-      orginal_issue = JiraIssue.create_from_jira_data!(jira_sub_task)
+      orginal_issue = JiraIssue.create_from_jira_data!(jira_client, jira_sub_task)
 
       jira_sub_task.parent['key'] = 'STORY-9999'
 
-      updated_issue = JiraIssue.create_from_jira_data!(jira_sub_task)
+      updated_issue = JiraIssue.create_from_jira_data!(jira_client, jira_sub_task)
 
       expect(JiraIssue.count).to eq(3)
       expect(orginal_issue.parent_issue.id).not_to eq(updated_issue.parent_issue.id)

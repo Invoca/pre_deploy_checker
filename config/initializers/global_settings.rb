@@ -41,11 +41,11 @@ end
 def validate_jira_settings(jira_settings)
   return if skip_validations
 
-  jira_settings['site'].blank? and raise InvalidSettings, 'Must specify JIRA site URL'
-  jira_settings['consumer_key'].blank? and raise InvalidSettings, 'Must specify JIRA consumer key'
-  jira_settings['access_token'].blank? and raise InvalidSettings, 'Must specify JIRA access token'
-  jira_settings['access_key'].blank? and raise InvalidSettings, 'Must specify JIRA access key'
-  jira_settings['private_key_file'].blank? and raise InvalidSettings, 'Must specify JIRA private key file name'
+  Rails.application.secrets.jira[:'site'].blank? and raise InvalidSettings, 'Must specify JIRA site URL'
+  Rails.application.secrets.jira[:'consumer_key'].blank? and raise InvalidSettings, 'Must specify JIRA consumer key'
+  Rails.application.secrets.jira[:'access_token'].blank? and raise InvalidSettings, 'Must specify JIRA access token'
+  Rails.application.secrets.jira[:'access_key'].blank? and raise InvalidSettings, 'Must specify JIRA access key'
+  Rails.application.secrets.jira[:'private_key_file'].blank? and raise InvalidSettings, 'Must specify JIRA private key file name'
   jira_settings.project_keys.empty? and raise InvalidSettings, 'Must specify at least one JIRA project key'
   jira_settings.ancestor_branches.empty? and raise InvalidSettings, 'Must specify at least one JIRA ancestor branch mapping'
   jira_settings.valid_statuses.empty? and raise InvalidSettings, 'Must specify at least one valid JIRA status'

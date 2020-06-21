@@ -1,6 +1,6 @@
 class PushManager
   class << self
-    def process_push!(push)
+    def process_push!(jira_client, push)
       push.status = Github::Api::Status::STATE_PENDING
       push.save!
 
@@ -15,7 +15,7 @@ class PushManager
       link_commits_to_push(push, commits)
 
       Rails.logger.info("Getting #{all_issue_keys.length} JIRA issues for push id #{push.id}")
-      jira_issues = get_jira_issues!(all_issue_keys)
+      jira_issues = get_jira_issues!(jira_client, all_issue_keys)
 
       link_commits_to_jira_issues(jira_issues, commits)
 
@@ -79,12 +79,12 @@ class PushManager
       end
     end
 
-    def get_jira_issues!(issue_keys)
+    def get_jira_issues!(jira_client, issue_keys)
       jira_client = JIRA::ClientWrapper.new(Rails.application.secrets.jira)
       issue_keys.collect do |ticket_number|
         issue = jira_client.find_issue_by_key(ticket_number)
         if issue
-          JiraIssue.create_from_jira_data!(issue)
+          JiraIssue.create_from_jira_data!(jira_client, issue)
         end
       end.compact
     end

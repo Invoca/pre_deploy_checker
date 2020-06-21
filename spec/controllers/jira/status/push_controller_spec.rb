@@ -36,7 +36,7 @@ describe Jira::Status::PushController, type: :controller do
       get :deploy_email, params: { id: '12345678' }
       expect(response).to have_http_status(302)
       expect(flash[:alert]).to match(/Email was already sent/)
-      expect(DeployEmailInterceptor.intercepted_email).to eq(nil)
+      expect(DeployEmailInterceptor.intercepted_email).to eq(jira_client)
     end
 
     it 'does not set email_sent to true if sending the email raises an error' do

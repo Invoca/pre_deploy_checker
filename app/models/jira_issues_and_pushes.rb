@@ -21,33 +21,35 @@ class JiraIssuesAndPushes < ActiveRecord::Base
     jira_issue.commits_for_push(push)
   end
 
-  def self.create_or_update!(jira_issue, push, error_list = nil)
-    record = JiraIssuesAndPushes.where(jira_issue: jira_issue, push: push).first_or_initialize
-    # preserve existing errors if not specified
-    if error_list
-      record.error_list = error_list
+  class << self
+    def create_or_update!(jira_issue, push, error_list = nil)
+      record = JiraIssuesAndPushes.where(jira_issue: jira_issue, push: push).first_or_initialize
+      # preserve existing errors if not specified
+      if error_list
+        record.error_list = error_list
+      end
+      # if this is a newly created relationship, copy the ignore flag from the most recent relationship
+      unless record.id
+        record.copy_ignore_flag_from_most_recent_push
+      end
+      record.save!
+      record
     end
-    # if this is a newly created relationship, copy the ignore flag from the most recent relationship
-    unless record.id
-      record.copy_ignore_flag_from_most_recent_push
+
+    def get_error_counts_for_push(push)
+      get_error_counts(with_unignored_errors.for_push(push))
     end
-    record.save!
-    record
-  end
 
-  def self.get_error_counts_for_push(push)
-    get_error_counts(with_unignored_errors.for_push(push))
-  end
+    def mark_as_merged_if_jira_issue_not_in_list(push, jira_issues)
+      jira_issue_not_in_list(push, jira_issues).update_all(merged: true)
+    end
 
-  def self.mark_as_merged_if_jira_issue_not_in_list(push, jira_issues)
-    jira_issue_not_in_list(push, jira_issues).update_all(merged: true)
-  end
-
-  def self.jira_issue_not_in_list(push, jira_issues)
-    if jira_issues.any?
-      for_push(push).where('jira_issue_id NOT IN (?)', jira_issues)
-    else
-      for_push(push)
+    def jira_issue_not_in_list(push, jira_issues)
+      if jira_issues.any?
+        for_push(push).where('jira_issue_id NOT IN (?)', jira_issues)
+      else
+        for_push(push)
+      end
     end
   end
 

@@ -41,17 +41,17 @@ class JiraIssue < ActiveRecord::Base
   end
 
   def jira_url_for_issue
-    "#{Rails.application.secrets.jira['site']}/browse/#{key}"
+    "#{Rails.application.secrets.jira[:'site']}/browse/#{key}"
   end
 
   class << self
-    def create_from_jira_data!(jira_data)
-      issue = create_from_jira_data(jira_data)
+    def create_from_jira_data!(jira_client, jira_data)
+      issue = create_from_jira_data(jira_client, jira_data)
       issue.save!
       issue
     end
 
-    def create_from_jira_data(jira_data)
+    def create_from_jira_data(jira_client, jira_data)
       issue = JiraIssue.where(key: jira_data.key).first_or_initialize
       issue.summary = jira_data.summary.truncate(1024)
       issue.issue_type = jira_data.issuetype.name
@@ -61,11 +61,11 @@ class JiraIssue < ActiveRecord::Base
       issue.long_running_migration = extract_custom_multi_select_field_from_jira_data(jira_data, 10601)
 
       if jira_data.assignee
-        issue.assignee = User.create_from_jira_data!(jira_data.assignee)
+        issue.assignee = User.create_from_jira_data!(jira_client, jira_data.assignee)
       end
 
       if jira_data.respond_to?(:parent)
-        issue.parent_issue = create_from_jira_data!(JIRA::Resource::IssueFactory.new(nil).build(jira_data.parent))
+        issue.parent_issue = create_from_jira_data!(jira_client, JIRA::Resource::IssueFactory.new(jira_client).build(jira_data.parent))
       end
 
       issue

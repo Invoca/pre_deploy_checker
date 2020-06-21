@@ -11,7 +11,7 @@ class PushChangeHandler
 
   def process_push!(push_id)
     Rails.logger.info("Processing push id #{push_id}")
-    push = PushManager.process_push!(Push.find(push_id))
+    push = PushManager.process_push!(jira_client, Push.find(push_id))
     set_status_for_push!(push)
   end
   handle_asynchronously(:process_push!, queue: PROCESSING_QUEUE)

@@ -2,11 +2,11 @@ require 'spec_helper'
 
 describe 'JiraIssuesAndPushes' do
   def jira_issue
-    @jira_issue ||= JIRA::Resource::IssueFactory.new(nil).build(load_json_fixture('jira_issue_response'))
+    @jira_issue ||= JIRA::Resource::IssueFactory.new(jira_client).build(load_json_fixture('jira_issue_response'))
   end
 
   before do
-    @issue = JiraIssue.create_from_jira_data!(jira_issue)
+    @issue = JiraIssue.create_from_jira_data!(jira_client, jira_issue)
     @push = create_test_push
   end
 

@@ -1,5 +1,3 @@
-require 'jira'
-
 module JIRA
   class ClientWrapper < JIRA::Client
     def initialize(settings)
