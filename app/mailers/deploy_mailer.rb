@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require_relative 'application_mailer'
+require 'inline_styles_mailer'
+
 class DeployMailer < ApplicationMailer
   include InlineStylesMailer
   default from: 'deploy@invoca.com'

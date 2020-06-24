@@ -27,7 +27,8 @@ describe Jira::Status::PushController, type: :controller do
       sent_email = DeployEmailInterceptor.intercepted_email
       expect(sent_email.to).to eq ['deploy@invoca.com']
       expect(sent_email.from).to eq ['deploy@invoca.com']
-      expect(sent_email.subject).to match(/Web Deploy #{Time.now.strftime('%m/%d/%y')}/)
+      expect(Time.zone.name).to eq("Pacific Time (US & Canada)")
+      expect(sent_email.subject).to include("Web Deploy #{Time.now.strftime('%m/%d/%y %H:%M %z')}")
       expect(@push.reload.email_sent).to eq(true)
     end
 

@@ -1,3 +1,7 @@
+
+# log to stdout and file
+Rails.logger.extend(ActiveSupport::Logger.broadcast(Logger.new(STDOUT)))
+
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
