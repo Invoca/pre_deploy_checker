@@ -1,19 +1,25 @@
-PATH
-  remote: ../git_lib
+GIT
+  remote: git@github.com:Invoca/git_lib
+  revision: 87ceede37909d5179c8c03a5dc805406bdf92530
+  ref: 87ceede37909d5179c8c03a5dc805406bdf92530
   specs:
-    git_lib (2.0.0)
+    git_lib (1.2.0)
       activesupport (>= 4.2)
 
-PATH
-  remote: ../git_models
+GIT
+  remote: git@github.com:Invoca/git_models
+  revision: e6ac9ec35c583f9cc3b6b000b8dba6b8694074c2
+  ref: e6ac9ec35c583f9cc3b6b000b8dba6b8694074c2
   specs:
-    git_models (2.0.0)
-      git_lib (~> 2.0)
+    git_models (1.2.0)
+      git_lib (~> 1.2)
       hobo_fields (~> 3.0)
-      rails (~> 5.2)
+      rails (>= 4.2)
 
-PATH
-  remote: ../hobo_fields
+GIT
+  remote: git@github.com:Invoca/hobo_fields
+  revision: 5918bab7f011b9833fb488ad86f4108a8ff9876c
+  ref: 5918bab7f011b9833fb488ad86f4108a8ff9876c
   specs:
     hobo_fields (3.0.0)
       invoca-utils (~> 0.4)
@@ -385,8 +391,8 @@ DEPENDENCIES
   delayed_job_active_record
   fakefs
   foreman
-  git_lib (~> 2.0)!
-  git_models (~> 2.0)!
+  git_lib (~> 1.2)!
+  git_models (~> 1.2)!
   hobo_fields (~> 3.0)!
   inline_styles_mailer
   invoca_secrets!

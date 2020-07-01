@@ -32,15 +32,9 @@ group :test do
 end
 
 group :development do
-  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
-
-  # Access an IRB console on exception pages or by using <%= console %> in views
   gem 'web-console'
-
-  # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
-
   gem 'foreman'
 end
 
@@ -48,12 +42,11 @@ group :production do
   gem 'unicorn'
 end
 
-gem 'git_lib', '~> 2.0', path: '../git_lib'
-gem 'git_models', '~> 2.0', path: '../git_models'
-gem 'hobo_fields', '~> 3.0', path: '../hobo_fields'
-gem 'delayed_job_active_record'
 gem 'daemons'
+gem 'delayed_job_active_record'
+gem 'git_lib',     '~> 1.2', git: 'git@github.com:Invoca/git_lib', ref: '87ceede37909d5179c8c03a5dc805406bdf92530'
+gem 'git_models',  '~> 1.2', git: 'git@github.com:Invoca/git_models', ref: 'e6ac9ec35c583f9cc3b6b000b8dba6b8694074c2'
+gem 'hobo_fields', '~> 3.0', git: 'git@github.com:Invoca/hobo_fields', ref: '5918bab7f011b9833fb488ad86f4108a8ff9876c'
+gem 'invoca_secrets', source: 'https://gem.fury.io/invoca'
 gem 'jira-ruby', require: 'jira-ruby'
 gem 'pry'
-
-gem 'invoca_secrets', source: 'https://gem.fury.io/invoca'
