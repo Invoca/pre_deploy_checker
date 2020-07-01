@@ -2,7 +2,7 @@ class User < ActiveRecord::Base
   include GitModels::User
 
   class << self
-    def create_from_jira_data!(jira_client, jira_user_data)
+    def create_from_jira_data!(_jira_client, jira_user_data)
       # Uses fake email to guarantee uniqueness
       name = jira_user_data.displayName
       User.where(name: name, email: fake_email_from_name(name)).first_or_create!

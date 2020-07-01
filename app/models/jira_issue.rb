@@ -41,7 +41,7 @@ class JiraIssue < ActiveRecord::Base
   end
 
   def jira_url_for_issue
-    "#{Rails.application.secrets.jira[:'site']}/browse/#{key}"
+    "#{Rails.application.secrets.jira[:site]}/browse/#{key}"
   end
 
   class << self

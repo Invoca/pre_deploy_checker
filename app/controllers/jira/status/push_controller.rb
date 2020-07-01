@@ -88,7 +88,7 @@ module Jira
       helper_method :github_url_for_commit
 
       def jira_url_for_issue(jira_issue)
-        "#{Rails.application.secrets.jira[:'site']}/browse/#{jira_issue.key}"
+        "#{Rails.application.secrets.jira[:site]}/browse/#{jira_issue.key}"
       end
       helper_method :jira_url_for_issue
 
