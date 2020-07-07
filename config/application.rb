@@ -12,6 +12,8 @@ module GitConflictDetector
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
 
+    Rails.application.config.active_record.sqlite3.represent_boolean_as_integer = true
+
     # Set Time.zone default to the specified zone and make Active Record auto-convert to this zone.
     # Run "rake -D time" for a list of tasks for finding time zone names. Default is UTC.
     config.time_zone = Time.zone = 'Pacific Time (US & Canada)'
