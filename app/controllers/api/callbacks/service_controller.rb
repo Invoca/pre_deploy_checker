@@ -37,7 +37,7 @@ module Api
       end
 
       def digest_request_parameters(key)
-        data = request.request_parameters.sort.to_s
+        data = request.request_parameters.except('service').sort.to_s
         Rails.logger.info("auth body from pre-deploy-checker: #{data}")
         Rails.logger.info("params from pre-deploy-checker: #{params}")
         puts "auth body from pre-deploy-checker: #{data}"
