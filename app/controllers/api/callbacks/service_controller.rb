@@ -37,7 +37,7 @@ module Api
       end
 
       def digest_request_parameters(key)
-        data = request.request_parameters.sort.to_s
+        data = request.request_parameters.except('service').sort.to_s
         OpenSSL::HMAC.hexdigest('SHA256', key, data)
       end
     end
