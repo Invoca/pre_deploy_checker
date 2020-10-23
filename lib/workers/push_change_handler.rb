@@ -26,7 +26,7 @@ class PushChangeHandler
   private
 
   def set_status_for_push!(push) # rubocop:disable Naming/AccessorMethodName
-    if push.service.name == "web"
+    if push.service_name == "web"
       api = Github::Api::Status.new(Rails.application.secrets.github_user_name,
                                     Rails.application.secrets.github_password)
       api.set_status(push.branch.repository.name,
