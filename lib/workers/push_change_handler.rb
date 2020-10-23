@@ -26,13 +26,15 @@ class PushChangeHandler
   private
 
   def set_status_for_push!(push) # rubocop:disable Naming/AccessorMethodName
-    api = Github::Api::Status.new(Rails.application.secrets.github_user_name,
-                                  Rails.application.secrets.github_password)
-    api.set_status(push.branch.repository.name,
-                   push.head_commit.sha,
-                   CONTEXT_NAME,
-                   push.status,
-                   STATE_DESCRIPTIONS[push.status.to_sym],
-                   url_for(controller: '/jira/status/push', action: :edit, id: push.head_commit.sha))
+    if push.service_name == "web"
+      api = Github::Api::Status.new(Rails.application.secrets.github_user_name,
+                                    Rails.application.secrets.github_password)
+      api.set_status(push.branch.repository.name,
+                     push.head_commit.sha,
+                     CONTEXT_NAME,
+                     push.status,
+                     STATE_DESCRIPTIONS[push.status.to_sym],
+                     url_for(controller: '/jira/status/push', action: :edit, id: push.head_commit.sha))
+    end
   end
 end
