@@ -1,16 +1,9 @@
-# MySQL version 2.x
-#   gem install mysql2
-#
-#   Ensure the MySQL 2 gem is defined in your Gemfile
-#   gem 'mysql2'
-#
-
 default: &default
   adapter: mysql2
   pool: 5
   username: <%= ENV['DATABASE_USER'] || "rr_dev" %>
   password: <%= ENV['DATABASE_PASS'] || "dev" %>
-  host: 127.0.0.1
+  host: <%= File.exist?('/tmp/mysql.sock') ? 'localhost' : '127.0.0.1' %>
 
 test:
   <<: *default
