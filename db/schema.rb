@@ -10,11 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_22_230337) do
+ActiveRecord::Schema.define(version: 2020_10_25_185335) do
 
-  create_table "branches", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8",force: :cascade do |t|
+  create_table "branches", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.datetime "git_updated_at", null: false
-    t.text "name", null: false
+    t.string "name", limit: 1024, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer "author_id", null: false
@@ -23,9 +23,9 @@ ActiveRecord::Schema.define(version: 2020_09_22_230337) do
     t.index ["repository_id"], name: "index_branches_on_repository_id"
   end
 
-  create_table "commits", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8",force: :cascade do |t|
-    t.text "sha", limit: 255, null: false
-    t.text "message", null: false
+  create_table "commits", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.string "sha", null: false
+    t.text "message", limit: 4294967295, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer "author_id", null: false
@@ -35,7 +35,7 @@ ActiveRecord::Schema.define(version: 2020_09_22_230337) do
   end
 
   create_table "commits_and_pushes", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.string "errors_json", limit: 256
+    t.text "errors_json", limit: 4294967295
     t.boolean "ignore_errors", default: false, null: false
     t.integer "push_id", null: false
     t.integer "commit_id", null: false
@@ -47,8 +47,8 @@ ActiveRecord::Schema.define(version: 2020_09_22_230337) do
   create_table "delayed_jobs", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.integer "priority", default: 0, null: false
     t.integer "attempts", default: 0, null: false
-    t.text "handler", null: false
-    t.text "last_error"
+    t.text "handler", limit: 4294967295, null: false
+    t.text "last_error", limit: 4294967295
     t.datetime "run_at"
     t.datetime "locked_at"
     t.datetime "failed_at"
@@ -59,26 +59,26 @@ ActiveRecord::Schema.define(version: 2020_09_22_230337) do
     t.index ["priority", "run_at"], name: "delayed_jobs_priority"
   end
 
-  create_table "jira_issues", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8",force: :cascade do |t|
-    t.text "key",  null: false
-    t.text "issue_type",  null: false
-    t.text "summary",  null: false
-    t.text "status",  null: false
+  create_table "jira_issues", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "issue_type", null: false
+    t.text "summary", limit: 4294967295, null: false
+    t.string "status", null: false
     t.date "targeted_deploy_date"
-    t.text "post_deploy_check_status"
-    t.text "deploy_type"
+    t.string "post_deploy_check_status"
+    t.string "deploy_type"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer "assignee_id"
     t.integer "parent_issue_id"
     t.text "secrets_modified"
-    t.text "long_running_migration"
+    t.string "long_running_migration"
     t.index ["assignee_id"], name: "index_jira_issues_on_assignee_id"
     t.index ["parent_issue_id"], name: "index_jira_issues_on_parent_issue_id"
   end
 
   create_table "jira_issues_and_pushes", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.string "errors_json", limit: 256
+    t.text "errors_json", limit: 4294967295
     t.boolean "ignore_errors", default: false, null: false
     t.integer "push_id", null: false
     t.integer "jira_issue_id", null: false
@@ -87,34 +87,34 @@ ActiveRecord::Schema.define(version: 2020_09_22_230337) do
     t.index ["push_id"], name: "index_jira_issues_and_pushes_on_push_id"
   end
 
-  create_table "pushes", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8",force: :cascade do |t|
+  create_table "pushes", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "status", limit: 32, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer "head_commit_id", null: false
     t.integer "branch_id", null: false
     t.boolean "email_sent", default: false, null: false
+    t.bigint "service_id", null: false
     t.index ["branch_id"], name: "index_pushes_on_branch_id"
-    t.integer "service_id", limit: 8, null: false
     t.index ["head_commit_id"], name: "index_pushes_on_head_commit_id"
     t.index ["service_id"], name: "on_service_id"
   end
 
-  create_table "repositories", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8",force: :cascade do |t|
-    t.text "name", null: false
+  create_table "repositories", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.string "name", null: false
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  create_table "services", id: :bigint, force: :cascade do |t|
-    t.string "name", limit: 255, null: false
-    t.string "ref", limit: 255, default: "master", null: false
+  create_table "services", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "ref", default: "master", null: false
     t.index ["name"], name: "on_name", unique: true
   end
 
-  create_table "users", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8",force: :cascade do |t|
-    t.text "name",  null: false
-    t.text "email", null: false
+  create_table "users", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "email", null: false
     t.datetime "created_at"
     t.datetime "updated_at"
   end
