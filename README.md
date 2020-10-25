@@ -52,7 +52,6 @@ The PDC can be triggered several ways:
 * Point the webhook at http://YOURSERVERNAME/api/v1/callbacks/github/push
 
 ## Development Environment Setup
-* Install SQLite3
 * Install bundler
 * Install rbenv
 * Install git (>= 2.6.2)
