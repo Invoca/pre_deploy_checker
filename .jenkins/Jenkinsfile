@@ -64,7 +64,7 @@ pipeline {
           steps { sh 'bundle exec rake coveralls:push' }
         }
 
-        stage('Breakman') {
+        stage('Brakeman') {
           steps { sh 'bundle exec brakeman -z' }
         }
 
