@@ -2,15 +2,16 @@ class JiraIssue < ActiveRecord::Base
   KEY_PROJECT_NUMBER_SEPARATOR = '-'.freeze
 
   fields do
-    key :text, limit: 255, null: false
-    issue_type :text, limit: 255, null: false
-    summary :text, limit: 1024, null: false
-    status :text, limit: 255, null: false
+    key                 :string, limit: 255, null: false
+    issue_type          :string, limit: 255, null: false
+    summary             :text, limit: 0xffff_ffff, null: false
+    status              :string, limit: 255, null: false
     targeted_deploy_date :date, null: true # Custom Data Field: 10600
-    post_deploy_check_status :text, limit: 255, null: true
-    deploy_type :text, limit: 255, null: true
-    secrets_modified :text, limit: 255, null: true # deprecated
-    long_running_migration :text, limit: 255, null: true
+    post_deploy_check_status :string, limit: 255, null: true
+    deploy_type         :string, limit: 255, null: true
+    secrets_modified    :text, limit: 0xffff, null: true # deprecated
+    long_running_migration :string, limit: 255, null: true
+
     timestamps
   end
 
