@@ -3,7 +3,7 @@ module ErrorsJson
 
   included do
     fields do
-      errors_json :text, null: true
+      errors_json :text, limit: 0xffff_ffff, null: true
       ignore_errors :boolean, default: false, null: false
     end
 
