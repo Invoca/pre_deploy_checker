@@ -381,7 +381,7 @@ DEPENDENCIES
   fakefs
   foreman
   git_lib (~> 1.2)
-  git_models (~> 1.3)
+  git_models (~> 1.3, >= 1.3.1)
   inline_styles_mailer
   invoca_secrets!
   jbuilder (~> 2.0)
