@@ -55,7 +55,7 @@ module GitConflictDetector
     end
 
     initializer :configure_mailer, after: [:configure_secrets, :load_environment_config], group: :all do
-      smtp_settings = InvocaSecrets['email', 'smtp', 'default'].symbolize_keys
+      smtp_settings = InvocaSecrets['email', 'send_grid', 'invoca_net', 'smtp'].symbolize_keys
       config.action_mailer.smtp_settings = smtp_settings
       Mail.defaults { delivery_method :smtp, smtp_settings }
       ActionMailer::Base.smtp_settings = smtp_settings
