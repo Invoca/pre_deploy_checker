@@ -2,42 +2,52 @@
 
 class Push < ActiveRecord::Base
   fields do
-    status       :string,  limit: 32
+    status       :string,  limit: 32, validates: { inclusion: Github::Api::Status::STATES.map(&:to_s) }
     email_sent   :boolean, default: false
 
     timestamps
   end
-
-  validates :status, inclusion: Github::Api::Status::STATES.map(&:to_s)
 
   has_many :commits_and_pushes, class_name: :CommitsAndPushes, inverse_of: :push, dependent: :destroy
   has_many :commits, through: :commits_and_pushes
   has_many :jira_issues_and_pushes, class_name: :JiraIssuesAndPushes, inverse_of: :push, dependent: :destroy
   has_many :jira_issues, through: :jira_issues_and_pushes
 
-  belongs_to :head_commit, class_name: 'Commit', required: true
-  belongs_to :branch, inverse_of: :pushes, required: true
-  belongs_to :service, class_name: 'Service', required: true
+  belongs_to :head_commit, class_name: 'Commit', inverse_of: :head_pushes, optional: false
+  belongs_to :branch, inverse_of: :pushes, optional: false
+  belongs_to :service, inverse_of: :pushes, optional: false # TODO: This looks odd, this should probably be many to many
 
-  def self.create_from_github_data!(github_data)
-    commit = Commit.create_from_github_data!(github_data)
-    branch = Branch.create_from_git_data!(github_data.git_branch_data)
-    Service.all.map do |service|
-      push = Push.where(head_commit: commit, branch: branch, service: service).first_or_initialize
-      push.status = Github::Api::Status::STATE_PENDING
-      push.save!
-      CommitsAndPushes.create_or_update!(commit, push)
-      push.reload
+  class << self
+    def create_from_github_data!(github_data)
+      transaction do
+        commit = Commit.create_from_git_commit!(github_data)
+        branch = Branch.create_from_git_data!(github_data.git_branch_data)
+        # TODO: Service should map to repo and push should map to repo for this association tree
+        Service.all.map do |service|
+          push = Push.find_or_initialize_by(head_commit: commit, branch: branch, service: service)
+          push.status = Github::Api::Status::STATE_PENDING
+          push.save!
+          CommitsAndPushes.create_or_update!(commit, push)
+          # TODO: this is a code smell, we should figure this out and remove it
+          push.reload
+        end
+      end
+    end
+
+    def with_jira_issue(key)
+      joins(:jira_issues).where(jira_issue: { key: key })
+    end
+
+    def for_service(service_name)
+      joins(:service).where(service: { name: service_name })
+    end
+
+    def for_commit_and_service(commit, service_name)
+      joins(:head_commit, :service).where(commits: { sha: commit }, service: { name: service_name })
     end
   end
 
   delegate :name, to: :service, prefix: true
-
-  scope :with_jira_issue, ->(key) { joins(:jira_issues).where('jira_issues.key = ?', key) }
-  scope :for_service, ->(service_name) { joins(:service).where('services.name = ?', service_name) }
-  scope :for_commit_and_service, ->(commit, service_name) do
-    joins(:head_commit, :service).where('commits.sha = ? and services.name = ?', commit, service_name)
-  end
 
   def to_s
     "#{branch.name}/#{head_commit.sha}"
@@ -87,6 +97,8 @@ class Push < ActiveRecord::Base
     commits_with_errors? || jira_issues_with_errors?
   end
 
+  # TODO: This is a lot of knowledge of Jira Issues in the Push class
+  #       we should move this over to jira issues and use it there.
   def unmerged_jira_issues
     jira_issues_and_pushes.where(merged: false).map(&:jira_issue)
   end

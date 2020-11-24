@@ -1,20 +1,43 @@
 class Commit < ActiveRecord::Base
-  include GitModels::Commit
+  fields do
+    sha :string, limit: 40, index: true, unique: true,
+      validates: { uniqueness: { message: 'SHAs must be globally unique' }, format: { without: /0{40}/ } }
 
-  belongs_to :jira_issue, class_name: 'JiraIssue', inverse_of: :commits, required: false, null: true
+    message :string, limit: 1024
+    timestamps
+  end
 
-  has_many :commits_and_pushes, class_name: :CommitsAndPushes, inverse_of: :commit, dependent: :destroy
+  belongs_to :author,     class_name: 'User',      inverse_of: :commits, optional: false
+  belongs_to :jira_issue, class_name: 'JiraIssue', inverse_of: :commits, optional: true
+
+  has_many :commits_and_pushes, class_name: 'CommitsAndPushes', inverse_of: :commit, dependent: :destroy
   has_many :pushes, through: :commits_and_pushes
 
-  def self.create_from_github_data!(github_data)
-    commit = Commit.where(sha: github_data.sha).first_or_initialize
-    commit.message = github_data.message.truncate(1024)
-    commit.author = User.create_from_git_data!(github_data.git_branch_data)
-    commit.save!
-    commit
+  has_many :head_pushes, class_name: 'Push', inverse_of: :head_commit
+
+  class << self
+    def create_from_git_commit!(git_commit)
+      where(sha: git_commit.sha).first_or_initialize.tap do |commit|
+        commit.message = git_commit.message.truncate(1024)
+        commit.author = User.find_or_create_by!(name: github_data.author_name, email: github_data.author_email)
+        commit.save!
+      end
+    end
   end
 
   def message_contains_no_jira_tag?
-    message.downcase.match?(/no[-,_,\s]jira/)
+    message.match?(/no[-,_,\s]?jira/i)
+  end
+
+  def short_sha
+    sha[0, 7]
+  end
+
+  def to_s
+    sha
+  end
+
+  def <=>(other)
+    sha <=> other.sha
   end
 end
