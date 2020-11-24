@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 class JiraIssuesAndPushes < ActiveRecord::Base
   include ErrorsJson
 
-  ERROR_WRONG_STATE = 'wrong_state'.freeze
-  ERROR_POST_DEPLOY_CHECK_STATUS = 'wrong_post_deploy_status'.freeze
-  ERROR_NO_COMMITS = 'no_commits'.freeze
-  ERROR_BLANK_LONG_RUNNING_MIGRATION = 'blank_long_running_migration'.freeze
+  ERROR_WRONG_STATE = 'wrong_state'
+  ERROR_POST_DEPLOY_CHECK_STATUS = 'wrong_post_deploy_status'
+  ERROR_NO_COMMITS = 'no_commits'
+  ERROR_BLANK_LONG_RUNNING_MIGRATION = 'blank_long_running_migration'
 
   fields do
     merged :boolean, default: false

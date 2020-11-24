@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # set path to application
 app_dir = File.expand_path('..', __dir__)
 working_directory app_dir

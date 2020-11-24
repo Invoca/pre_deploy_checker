@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class WidenTextColumns < ActiveRecord::Migration[5.0]
   def change
     migrate! do

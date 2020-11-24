@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 class JiraHookHandler
-  PROCESSING_QUEUE = 'jira_hook_handler'.freeze
+  PROCESSING_QUEUE = 'jira_hook_handler'
 
   def queue!(payload)
     Rails.logger.info('Processing JIRA hook')

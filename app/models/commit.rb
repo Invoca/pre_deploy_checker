@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Commit < ActiveRecord::Base
   fields do
     sha :string, limit: 40, index: true, unique: true,

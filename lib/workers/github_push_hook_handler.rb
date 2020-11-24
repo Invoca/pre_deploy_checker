@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 class GithubPushHookHandler
-  PROCESSING_QUEUE = 'github_push_handler'.freeze
+  PROCESSING_QUEUE = 'github_push_handler'
 
   def queue!(push_hook_payload)
     Rails.logger.info('Processing GitHub hook')

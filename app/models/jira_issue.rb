@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 class JiraIssue < ActiveRecord::Base
-  KEY_PROJECT_NUMBER_SEPARATOR = '-'.freeze
+  KEY_PROJECT_NUMBER_SEPARATOR = '-'
 
   fields do
     key                      :string, limit: 255, index: true, unique: true,

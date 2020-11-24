@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 # log to stdout and file
 Rails.logger.extend(ActiveSupport::Logger.broadcast(Logger.new(STDOUT)))

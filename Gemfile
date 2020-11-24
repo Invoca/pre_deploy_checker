@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 PRIVATE_GEM_SERVER = 'https://gem.fury.io/invoca'
 
 source 'https://rubygems.org'

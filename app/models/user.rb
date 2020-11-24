@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class User < ActiveRecord::Base
   fields do
     name  :string, limit: 255, index: true, unique: true, validates: { uniqueness: { scope: :email } }

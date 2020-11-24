@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe 'Status' do
-  EXPECTED_URL = 'https://api.github.com/repos/owner/repo/statuses/9999b61a5393432301de18960686226379d76999'.freeze
+  EXPECTED_URL = 'https://api.github.com/repos/owner/repo/statuses/9999b61a5393432301de18960686226379d76999'
 
   def mock_sucess_response_body(state)
     {

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PushManager
   class << self
     def process_push!(push)

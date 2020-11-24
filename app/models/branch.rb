@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Branch < ActiveRecord::Base
   fields do
     git_updated_at :datetime

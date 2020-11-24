@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CommitsAndPushes < ActiveRecord::Base
   fields do
     no_jira :boolean, default: false
@@ -5,9 +7,9 @@ class CommitsAndPushes < ActiveRecord::Base
 
   include ErrorsJson
 
-  ERROR_ORPHAN_NO_JIRA_ISSUE_NUMBER = 'orphan_no_jira_issue_number'.freeze
-  ERROR_ORPHAN_JIRA_ISSUE_NOT_FOUND = 'orphan_jira_issue_not_found'.freeze
-  NO_JIRA_FOUND                     = 'No-Jira tag found'.freeze
+  ERROR_ORPHAN_NO_JIRA_ISSUE_NUMBER = 'orphan_no_jira_issue_number'
+  ERROR_ORPHAN_JIRA_ISSUE_NOT_FOUND = 'orphan_jira_issue_not_found'
+  NO_JIRA_FOUND                     = 'No-Jira tag found'
 
   belongs_to :push,   inverse_of: :commits_and_pushes, optional: false
   belongs_to :commit, inverse_of: :commits_and_pushes, optional: false
