@@ -45,7 +45,7 @@ describe 'Commit' do
 
   context 'pushes' do
     before do
-      @commit = GitModels::TestHelpers.create_commit
+      @commit = create_commit
       @push = create_test_push
       # remove head commit so we don't confuse it with the commit we are testing
       @push.commits_and_pushes.destroy_all
