@@ -23,7 +23,7 @@ class JiraIssue < ActiveRecord::Base
 
   has_many :sub_tasks, class_name: 'JiraIssue', inverse_of: :parent_issue, dependent: :nullify
   has_many :commits, inverse_of: :jira_issue, dependent: :nullify
-  has_many :jira_issues_and_pushes, inverse_of: :jira_issue, dependent: :destroy
+  has_many :jira_issues_and_pushes, class_name: :JiraIssuesAndPushes, inverse_of: :jira_issue, dependent: :destroy
   has_many :pushes, through: :jira_issues_and_pushes
 
   class << self

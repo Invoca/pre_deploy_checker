@@ -8,7 +8,7 @@ describe 'Commit' do
   end
 
   it 'can create be constructed from github data' do
-    commit = Commit.create_from_github_data!(payload)
+    commit = Commit.create_from_git_commit!(payload)
     expect(commit.sha).to eq('6d8cc7db8021d3dbf90a4ebd378d2ecb97c2bc25')
     expect(commit.message).not_to be_nil
     expect(commit.author.name).not_to be_nil
@@ -19,7 +19,7 @@ describe 'Commit' do
 
   it 'can belong to a JIRA issue' do
     jira_issue = create_test_jira_issue
-    commit = Commit.create_from_github_data!(payload)
+    commit = Commit.create_from_git_commit!(payload)
     commit.jira_issue = jira_issue
     commit.save!
     expect(commit.jira_issue.id).to eq(jira_issue.id)
@@ -27,7 +27,7 @@ describe 'Commit' do
 
   context '#message_contains_no_jira_tag?' do
     before do
-      @commit = Commit.create_from_github_data!(payload)
+      @commit = Commit.create_from_git_commit!(payload)
     end
 
     ['no_jira', 'no-jira', 'NO-JIRA', 'NO_JIRA'].each do |message|

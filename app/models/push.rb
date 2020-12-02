@@ -35,11 +35,11 @@ class Push < ActiveRecord::Base
     end
 
     def with_jira_issue(key)
-      joins(:jira_issues).where(jira_issue: { key: key })
+      joins(:jira_issues).where(jira_issues: { key: key })
     end
 
     def for_service(service_name)
-      joins(:service).where(service: { name: service_name })
+      joins(:service).where(services: { name: service_name })
     end
 
     def for_commit_and_service(commit, service_name)
