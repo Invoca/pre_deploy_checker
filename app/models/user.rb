@@ -10,6 +10,7 @@ class User < ActiveRecord::Base
 
   has_many :branches, class_name: 'Branch',    foreign_key: 'author_id',   inverse_of: :author
   has_many :commits,  class_name: 'Commit',    foreign_key: 'author_id',   inverse_of: :author
+  has_many :issues,   class_name: 'JiraIssue', foreign_key: 'assignee_id', inverse_of: :assignee
 
   class << self
     def users_with_emails(email_filter_list)
