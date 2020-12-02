@@ -43,7 +43,7 @@ class Push < ActiveRecord::Base
     end
 
     def for_commit_and_service(commit, service_name)
-      joins(:head_commit, :service).where(commits: { sha: commit }, service: { name: service_name })
+      joins(:head_commit, :service).where(commits: { sha: commit }, services: { name: service_name })
     end
   end
 
