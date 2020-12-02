@@ -21,7 +21,7 @@ class Branch < ActiveRecord::Base
         find_or_initialize_by(repository: repository, name: branch_data.name).tap do |branch|
           branch.git_updated_at = branch_data.last_modified_date
           branch.updated_at = Time.current # force updated time
-          branch.author = User.find_or_create_by!(name: github_data.author_name, email: github_data.author_email)
+          branch.author = User.find_or_create_by!(name: branch_data.author_name, email: branch_data.author_email)
           branch.save!
         end
       end

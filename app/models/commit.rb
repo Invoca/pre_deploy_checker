@@ -21,7 +21,7 @@ class Commit < ActiveRecord::Base
     def create_from_git_commit!(git_commit)
       where(sha: git_commit.sha).first_or_initialize.tap do |commit|
         commit.message = git_commit.message.truncate(1024)
-        commit.author = User.find_or_create_by!(name: github_data.author_name, email: github_data.author_email)
+        commit.author = User.find_or_create_by!(name: git_commit.author_name, email: git_commit.author_email)
         commit.save!
       end
     end

@@ -58,7 +58,7 @@ class JiraIssue < ActiveRecord::Base
 
     def extract_custom_select_field_from_jira_data(jira_data, field_number)
       field_name = "customfield_#{field_number}"
-      jira_data.dig(field_name, 'value')
+      jira_data.fields.dig(field_name, 'value')
     end
 
     def extract_custom_date_field_from_jira_data(jira_data, field_number)

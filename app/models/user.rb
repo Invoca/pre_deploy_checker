@@ -25,7 +25,7 @@ class User < ActiveRecord::Base
     def create_from_jira_data!(jira_user_data)
       # Uses fake email to guarantee uniqueness
       name = jira_user_data.displayName
-      User.find_or_create_by!(name: github_data.author_name, email: github_data.author_email)
+      User.find_or_create_by!(name: name, email: fake_email_from_name(name))
     end
 
     private
