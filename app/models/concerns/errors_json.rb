@@ -18,7 +18,7 @@ module ErrorsJson
         with_errors.where(ignore_errors: false)
       end
 
-      def error_counts()
+      def error_counts
         where(nil).each_with_object(Hash.new(0)) do |error_json_object, error_counts|
           error_json_object.error_list.each do |error|
             error_counts[error] += 1
