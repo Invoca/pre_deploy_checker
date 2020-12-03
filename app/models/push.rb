@@ -97,6 +97,13 @@ class Push < ActiveRecord::Base
     commits_with_errors? || jira_issues_with_errors?
   end
 
+  def error_counts
+    {
+      'jira_issue' => jira_issues_and_pushes.with_unignored_errors.error_counts,
+      'commit'     => commits_and_pushes.with_unignored_errors.error_counts
+    }
+  end
+
   # TODO: This is a lot of knowledge of Jira Issues in the Push class
   #       we should move this over to jira issues and use it there.
   def unmerged_jira_issues

@@ -102,7 +102,7 @@ describe 'CommitsAndPushes' do
       CommitsAndPushes.create_or_update!(@commit, @push, [CommitsAndPushes::ERROR_ORPHAN_JIRA_ISSUE_NOT_FOUND])
       @commit.reload
       expect(@commit.commits_and_pushes.with_unignored_errors.count).to eq(1)
-      expect(CommitsAndPushes.get_error_counts_for_push(@push)).to \
+      expect(@push.commits_and_pushes.with_unignored_errors.error_counts).to \
         eq(CommitsAndPushes::ERROR_ORPHAN_JIRA_ISSUE_NOT_FOUND => 1)
     end
 
@@ -112,14 +112,14 @@ describe 'CommitsAndPushes' do
       record.save!
       @commit.reload
       expect(@commit.commits_and_pushes.with_unignored_errors.count).to eq(0)
-      expect(CommitsAndPushes.get_error_counts_for_push(@push)).to eq({})
+      expect(@push.commits_and_pushes.with_unignored_errors.error_counts).to eq({})
     end
 
     it 'excludes pushes without errors' do
       CommitsAndPushes.create_or_update!(@commit, @push, [])
       @commit.reload
       expect(@commit.commits_and_pushes.with_unignored_errors.count).to eq(0)
-      expect(CommitsAndPushes.get_error_counts_for_push(@push)).to eq({})
+      expect(@push.commits_and_pushes.with_unignored_errors.error_counts).to eq({})
     end
   end
 

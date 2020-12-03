@@ -94,10 +94,7 @@ module Jira
       helper_method :jira_url_for_issue
 
       def combined_error_counts
-        error_counts = {}
-        error_counts['jira_issue'] = JiraIssuesAndPushes.get_error_counts_for_push(@push)
-        error_counts['commit'] = CommitsAndPushes.get_error_counts_for_push(@push)
-        error_counts
+        @push.error_counts
       end
       helper_method :combined_error_counts
 

@@ -33,11 +33,6 @@ class CommitsAndPushes < ActiveRecord::Base
       end
     end
 
-    # TODO: this can be cleaned up with scoping and Associa
-    def get_error_counts_for_push(push)
-      get_error_counts(with_unignored_errors.where(push: push))
-    end
-
     # TODO: this might be refactorable
     def destroy_if_commit_not_in_list(push, commits)
       if commits.any?

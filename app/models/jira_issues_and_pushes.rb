@@ -38,10 +38,6 @@ class JiraIssuesAndPushes < ActiveRecord::Base
       end
     end
 
-    def get_error_counts_for_push(push)
-      get_error_counts(with_unignored_errors.where(push: push))
-    end
-
     def mark_all_as_merged(push)
       where(push: push).update_all(merged: true)
     end
