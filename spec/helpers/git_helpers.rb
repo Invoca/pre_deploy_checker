@@ -24,9 +24,8 @@ module GitHelpers
     author_email: 'author@email.com',
     count: 2
   )
-    branches = []
-    (0..count - 1).each do |i|
-      branches << create_branch(
+    (0...count).map do |i|
+      create_branch(
         repository_name: repository_name,
         name: "path/#{author_name}/branch#{i}",
         last_modified_date: DateTime.current,
@@ -34,7 +33,6 @@ module GitHelpers
         author_email: author_email
       )
     end
-    branches
   end
 
   def create_commit(
@@ -50,15 +48,13 @@ module GitHelpers
   end
 
   def create_commits(author_name: 'Author Name', author_email: 'author@email.com', count: 2)
-    commits = []
-    (0..count - 1).each do |i|
-      commits << create_commit(
+    (0...count).map do |i|
+      create_commit(
         sha: (i + 1).to_s.ljust(40, '0'),
         message: "Commit message #{i + 1}",
         author_name: author_name,
         author_email: author_email
       )
     end
-    commits
   end
 end
