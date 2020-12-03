@@ -29,7 +29,7 @@ class JiraIssue < ActiveRecord::Base
   class << self
     def create_from_jira_data!(jira_data)
       transaction do
-        create_from_jira_data(jira_data).tap { |issue| issue.save! }
+        create_from_jira_data(jira_data).tap(&:save!)
       end
     end
 
