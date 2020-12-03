@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Load application configuration
 require 'ostruct'
 require 'yaml'

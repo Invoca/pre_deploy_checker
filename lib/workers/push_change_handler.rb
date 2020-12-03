@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 class PushChangeHandler
   include Rails.application.routes.url_helpers
 
-  PROCESSING_QUEUE = 'push_handler'.freeze
-  CONTEXT_NAME = 'Pre-Deploy Checker'.freeze
+  PROCESSING_QUEUE = 'push_handler'
+  CONTEXT_NAME = 'Pre-Deploy Checker'
   STATE_DESCRIPTIONS = {
     Github::Api::Status::STATE_PENDING => 'Processing...',
     Github::Api::Status::STATE_SUCCESS => 'OK to deploy',

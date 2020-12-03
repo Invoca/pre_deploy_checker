@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe 'JiraHookHandler' do
@@ -15,7 +17,7 @@ describe 'JiraHookHandler' do
   end
 
   it 'is handled by a delayed job' do
-    push = Push.create_from_github_data!(github_payload)
+    push = Push.create_from_github_data!(github_payload).first
     JiraIssuesAndPushes.create_or_update!(create_test_jira_issue(key: 'STORY-4380'), push)
 
     expect_any_instance_of(PushChangeHandler).to receive(:submit_push_for_processing!)
@@ -30,7 +32,7 @@ describe 'JiraHookHandler' do
   end
 
   it 'submits pushes for processing', disable_delayed_job: true do
-    push = Push.create_from_github_data!(github_payload)
+    push = Push.create_from_github_data!(github_payload).first
     JiraIssuesAndPushes.create_or_update!(create_test_jira_issue(key: 'STORY-4380'), push)
 
     expect_any_instance_of(PushChangeHandler).to receive(:submit_push_for_processing!)
@@ -46,7 +48,7 @@ describe 'JiraHookHandler' do
   end
 
   it 'does not process hooks for issues that have no material changes', disable_delayed_job: true do
-    push = Push.create_from_github_data!(github_payload)
+    push = Push.create_from_github_data!(github_payload).first
     jira_issue = JiraIssue.create_from_jira_data!(JIRA::Resource::IssueFactory.new(nil).build(jira_payload['issue']))
     JiraIssuesAndPushes.create_or_update!(jira_issue, push)
     expect_any_instance_of(PushChangeHandler).not_to receive(:submit_push_for_processing!)
@@ -55,7 +57,7 @@ describe 'JiraHookHandler' do
   end
 
   it 'process hooks for issues that only have minor differences', disable_delayed_job: true do
-    push = Push.create_from_github_data!(github_payload)
+    push = Push.create_from_github_data!(github_payload).first
     jira_issue = JiraIssue.create_from_jira_data(JIRA::Resource::IssueFactory.new(nil).build(jira_payload['issue']))
     jira_issue.summary = 'This is a different summary'
     jira_issue.save!

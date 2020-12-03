@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 PRIVATE_GEM_SERVER = 'https://gem.fury.io/invoca'
 
 source 'https://rubygems.org'
@@ -9,7 +11,6 @@ gem 'daemons'
 gem 'declare_schema', '~> 0.2'
 gem 'delayed_job_active_record'
 gem 'git_lib',        '~> 1.2'
-gem 'git_models',     '~> 1.3', '>= 1.3.1'
 gem 'inline_styles_mailer'
 gem 'invoca_secrets', source: PRIVATE_GEM_SERVER
 gem 'jbuilder',       '~> 2.0'

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class UpdateFieldsWithDefaults < ActiveRecord::Migration[4.2]
   def self.up
     change_column :commits_and_pushes, :errors_json, :string, :limit => 256, :null => true

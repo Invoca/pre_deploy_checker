@@ -7,7 +7,6 @@ Coveralls.wear!('rails') if ENV['CI'] == 'true'
 require_relative '../config/environment'
 require 'rails/test_help'
 require 'git/git_test_helpers'
-require 'git_models/test_helpers'
 require 'database_cleaner'
 require 'rake'
 require 'rspec/rails'
@@ -16,6 +15,7 @@ require 'webmock/rspec'
 require 'digest/sha1'
 require 'securerandom'
 require 'helpers/deploy_email_interceptor'
+require 'helpers/git_helpers'
 
 GitConflictDetector::Application.load_tasks
 
@@ -23,6 +23,7 @@ RSpec.configure do |config|
   config.add_formatter(RspecJunitFormatter, 'spec/reports/rspec.xml')
 
   config.include StubEnv::Helpers
+  config.include GitHelpers
 
   config.before(:suite) do
     DatabaseCleaner.strategy = :transaction

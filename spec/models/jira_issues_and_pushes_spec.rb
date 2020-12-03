@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe 'JiraIssuesAndPushes' do
@@ -99,7 +101,7 @@ describe 'JiraIssuesAndPushes' do
 
   context 'with commits' do
     it 'that are related' do
-      commit = GitModels::TestHelpers.create_commit(sha: Git::TestHelpers.create_sha)
+      commit = create_commit(sha: Git::TestHelpers.create_sha)
       CommitsAndPushes.create_or_update!(commit, @push)
       @issue.commits << commit
       @issue.save!
@@ -110,7 +112,7 @@ describe 'JiraIssuesAndPushes' do
 
     it 'that are not related' do
       other_push = create_test_push(sha: Git::TestHelpers.create_sha)
-      commit = GitModels::TestHelpers.create_commit(sha: Git::TestHelpers.create_sha)
+      commit = create_commit(sha: Git::TestHelpers.create_sha)
       CommitsAndPushes.create_or_update!(commit, other_push)
       JiraIssuesAndPushes.create_or_update!(@issue, other_push)
       @issue.commits << commit
@@ -126,7 +128,7 @@ describe 'JiraIssuesAndPushes' do
       JiraIssuesAndPushes.create_or_update!(@issue, @push, [JiraIssuesAndPushes::ERROR_WRONG_STATE])
       @issue.reload
       expect(@issue.jira_issues_and_pushes.with_unignored_errors.count).to eq(1)
-      expect(JiraIssuesAndPushes.get_error_counts_for_push(@push)).to \
+      expect(@push.jira_issues_and_pushes.with_unignored_errors.error_counts).to \
         eq(JiraIssuesAndPushes::ERROR_WRONG_STATE => 1)
     end
 
@@ -136,14 +138,14 @@ describe 'JiraIssuesAndPushes' do
       record.save!
       @issue.reload
       expect(@issue.jira_issues_and_pushes.with_unignored_errors.count).to eq(0)
-      expect(JiraIssuesAndPushes.get_error_counts_for_push(@push)).to eq({})
+      expect(@push.jira_issues_and_pushes.with_unignored_errors.error_counts).to eq({})
     end
 
     it 'excludes pushes without errors' do
       JiraIssuesAndPushes.create_or_update!(@issue, @push, [])
       @issue.reload
       expect(@issue.jira_issues_and_pushes.with_unignored_errors.count).to eq(0)
-      expect(JiraIssuesAndPushes.get_error_counts_for_push(@push)).to eq({})
+      expect(@push.jira_issues_and_pushes.with_unignored_errors.error_counts).to eq({})
     end
   end
 

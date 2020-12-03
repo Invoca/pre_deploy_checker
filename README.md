@@ -51,9 +51,10 @@ The PDC can be triggered several ways:
 * Create a webhook that is triggered for "Just the push event"
 * Point the webhook at http://YOURSERVERNAME/api/v1/callbacks/github/push
 
+<!-- TODO: Make this easier to run locally for testing and development -->
 ## Development Environment Setup
-* Install bundler
 * Install rbenv
+* Install bundler
 * Install git (>= 2.6.2)
 * Install docker (optional)
 * Configure git authentication to access the repo(s) you want the pre-deploy checker to operate upon

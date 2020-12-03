@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AddSecretAndMigrationColumnToJiraIssue < ActiveRecord::Migration[4.2]
   def self.up
     add_column :jira_issues, :secrets_modified, :text, :limit => 255

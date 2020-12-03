@@ -4,11 +4,9 @@ class Service < ActiveRecord::Base
   DEFAULT_ANCESTOR_BRANCH = 'master'
 
   fields do
-    name :string, limit: 255, required: true
-    ref  :string, limit: 255,  required: true, default: 'master'
+    name :string, limit: 255, index: true, unique: true, validates: { presence: true, uniqueness: true }
+    ref  :string, limit: 255, default: DEFAULT_ANCESTOR_BRANCH, validates: { presence: true }
   end
 
-  index [:name], unique: true
-  validates_presence_of :name, :ref
-  validates_uniqueness_of :name
+  has_many :pushes, inverse_of: :service
 end
