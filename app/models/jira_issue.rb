@@ -87,7 +87,7 @@ class JiraIssue < ActiveRecord::Base
   # TODO: This should use Rails Serialization
   def deploy_types
     if deploy_type
-      deploy_type.split(',').map_compact(&:strip)
+      deploy_type.split(',').map(&:strip)
     else
       []
     end
