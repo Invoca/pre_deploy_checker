@@ -8,7 +8,7 @@ source PRIVATE_GEM_SERVER
 gem 'bootstrap-sass'
 gem 'coffee-rails',   '~> 4.1'
 gem 'daemons'
-gem 'declare_schema', '~> 0.2'
+gem 'declare_schema', '~> 0.4', '>= 0.4.2'
 gem 'delayed_job_active_record'
 gem 'git_lib',        '~> 1.2'
 gem 'inline_styles_mailer'
