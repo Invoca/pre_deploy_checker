@@ -12,10 +12,10 @@ class Push < ActiveRecord::Base
   has_many :commits, through: :commits_and_pushes
   has_many :jira_issues_and_pushes, class_name: :JiraIssuesAndPushes, inverse_of: :push, dependent: :destroy
   has_many :jira_issues, through: :jira_issues_and_pushes
+  has_many :service, inverse_of: :pushes
 
   belongs_to :head_commit, class_name: 'Commit', inverse_of: :head_pushes, optional: false
   belongs_to :branch, inverse_of: :pushes, optional: false
-  belongs_to :service, inverse_of: :pushes, optional: false # TODO: This looks odd, this should probably be many to many
 
   class << self
     def create_from_github_data!(github_data)
