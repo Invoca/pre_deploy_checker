@@ -17,12 +17,12 @@ gem 'jbuilder',       '~> 2.0'
 gem 'jira-ruby',      '0.1.17', require: 'jira'
 gem 'jquery-rails'
 gem 'mysql2',         '~> 0.5.2'
-gem 'nokogiri',       '1.10.8'
+gem 'nokogiri',       '~> 1.11'
 gem 'pry'
 gem 'pry-byebug'
 gem 'rails',          '~> 5.2', ">= 5.2.4.4"
 gem 'sass-rails',     '~> 5.0'
-gem 'sdoc',           '~> 0.4.0', group: :doc
+gem 'sdoc',           '~> 0.4', group: :doc
 gem 'turbolinks'
 gem 'uglifier',       '>= 1.3.0'
 gem 'yaml_db'
@@ -30,7 +30,7 @@ gem 'yaml_db'
 group :test do
   gem 'brakeman', require: false
   gem 'bundler-audit', require: false
-  gem 'coveralls',    '~> 0.8.22', require: false
+  gem 'coveralls',    '~> 0.8', require: false
   gem 'database_cleaner'
   gem 'fakefs', require: 'fakefs/safe'
   gem 'mutant-rspec', require: false
