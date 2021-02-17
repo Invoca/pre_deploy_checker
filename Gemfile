@@ -8,7 +8,7 @@ source PRIVATE_GEM_SERVER
 gem 'bootstrap-sass'
 gem 'coffee-rails',   '~> 4.1'
 gem 'daemons'
-gem 'declare_schema', '~> 0.4', '>= 0.4.2'
+gem 'declare_schema', '~> 0.7' #, '>= 0.7.1'
 gem 'delayed_job_active_record'
 gem 'git_lib',        '~> 1.2'
 gem 'inline_styles_mailer'
@@ -19,6 +19,7 @@ gem 'jquery-rails'
 gem 'mysql2',         '~> 0.5.2'
 gem 'nokogiri',       '1.10.8'
 gem 'pry'
+gem 'pry-byebug'
 gem 'rails',          '~> 5.2', ">= 5.2.4.4"
 gem 'sass-rails',     '~> 5.0'
 gem 'sdoc',           '~> 0.4.0', group: :doc
