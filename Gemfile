@@ -11,7 +11,6 @@ gem 'daemons'
 gem 'declare_schema', '~> 0.8'
 gem 'delayed_job_active_record'
 gem 'git_lib',        '~> 1.2'
-gem 'inline_styles_mailer'
 gem 'invoca_secrets', source: PRIVATE_GEM_SERVER
 gem 'jbuilder',       '~> 2.0'
 gem 'jira-ruby',      '0.1.17', require: 'jira'
