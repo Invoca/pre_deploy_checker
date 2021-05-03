@@ -20,7 +20,7 @@ gem 'mysql2',         '~> 0.5.2'
 gem 'nokogiri',       '~> 1.11'
 gem 'pry'
 gem 'pry-byebug'
-gem 'rails',          '~> 5.2', ">= 5.2.4.4"
+gem 'rails',          '~> 6.0'
 gem 'sass-rails',     '~> 5.0'
 gem 'sdoc',           '~> 0.4', group: :doc
 gem 'turbolinks'
