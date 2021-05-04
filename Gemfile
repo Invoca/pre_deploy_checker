@@ -6,7 +6,7 @@ source 'https://rubygems.org'
 source PRIVATE_GEM_SERVER
 
 gem 'bootstrap-sass'
-gem 'coffee-rails',   '~> 4.1'
+gem 'coffee-rails',   '~> 5.0'
 gem 'daemons'
 gem 'declare_schema', '~> 0.8'
 gem 'delayed_job_active_record'
