@@ -49,7 +49,7 @@ group :development do
   gem 'byebug'
   gem 'foreman'
   gem 'spring'
-  gem 'web-console',  '~> 3.0'
+  gem 'web-console',  '~> 4.0'
 end
 
 group :production do
