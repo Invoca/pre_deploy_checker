@@ -6,12 +6,11 @@ source 'https://rubygems.org'
 source PRIVATE_GEM_SERVER
 
 gem 'bootstrap-sass'
-gem 'coffee-rails',   '~> 4.1'
+gem 'coffee-rails',   '~> 5.0'
 gem 'daemons'
 gem 'declare_schema', '~> 0.8'
 gem 'delayed_job_active_record'
 gem 'git_lib',        '~> 1.2'
-gem 'inline_styles_mailer'
 gem 'invoca_secrets', source: PRIVATE_GEM_SERVER
 gem 'jbuilder',       '~> 2.0'
 gem 'jira-ruby',      '0.1.17', require: 'jira'
@@ -20,7 +19,7 @@ gem 'mysql2',         '~> 0.5.2'
 gem 'nokogiri',       '~> 1.11'
 gem 'pry'
 gem 'pry-byebug'
-gem 'rails',          '~> 5.2', ">= 5.2.4.4"
+gem 'rails',          '~> 6.0'
 gem 'sass-rails',     '~> 5.0'
 gem 'sdoc',           '~> 0.4', group: :doc
 gem 'turbolinks'
@@ -50,7 +49,7 @@ group :development do
   gem 'byebug'
   gem 'foreman'
   gem 'spring'
-  gem 'web-console',  '~> 3.0'
+  gem 'web-console',  '~> 4.0'
 end
 
 group :production do

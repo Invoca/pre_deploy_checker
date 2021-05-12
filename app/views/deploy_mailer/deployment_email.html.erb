@@ -3,18 +3,18 @@
     The following tickets have been deployed:
   </p>
   <div>
-    <table class="table table-striped table-deploy-email" id="jira_issues_clipboard">
-      <thead class="table-deploy-email-header">
-        <tr class="table-deploy-email-body">
-          <th class="table-deploy-email-header-row">Key</th>
-          <th class="table-deploy-email-header-row" style="min-width: 300px">Summary</th>
+    <table class="table table-striped table-deploy-email" style="box-sizing:border-box;border-collapse:collapse;border-spacing:0;width:572px;max-width:100%;margin-bottom:20px;font-size:13px;color:#333333;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;border:1px solid #ccc" id="jira_issues_clipboard">
+      <thead class="table-deploy-email-header" style="box-sizing:border-box">
+        <tr class="table-deploy-email-body" style="box-sizing:border-box">
+          <th class="table-deploy-email-header-row" style="box-sizing:border-box;text-align:left;line-height:1.42857;vertical-align:bottom;border-top-width:0;border-bottom-width:2px;border-bottom-color:#dddddd;border-bottom-style:solid;padding:8px">Key</th>
+          <th class="table-deploy-email-header-row" style="min-width:300px;box-sizing:border-box;text-align:left;line-height:1.42857;vertical-align:bottom;border-top-width:0;border-bottom-width:2px;border-bottom-color:#dddddd;border-bottom-style:solid;padding:8px">Summary</th>
         </tr>
       </thead>
-      <tbody class="table-deploy-email-body">
+      <tbody class="table-deploy-email-body" style="box-sizing:border-box">
       <% @jira_issues.each do |issue| %>
-        <tr class="table-deploy-email-body <%= cycle('table-deploy-email-body-shadow', '') %>">
-          <td nowrap class="table-deploy-email-row"><%=link_to(issue.key, issue.jira_url_for_issue, target: '_blank')%></td>
-          <td class="table-deploy-email-row"><%=issue.summary%></td>
+        <tr class="table-deploy-email-body <%= cycle('table-deploy-email-body-shadow', '') %>" style="background-color:<%= cycle('#f9f9f9', '') %>;box-sizing:border-box" >
+          <td nowrap class="table-deploy-email-row" style="box-sizing:border-box;line-height:1.42857;vertical-align:top;border-top-width:1px;border-top-color:#dddddd;border-top-style:solid;padding:8px"><%=link_to(issue.key, issue.jira_url_for_issue, target: '_blank')%></td>
+          <td class="table-deploy-email-row" style="box-sizing:border-box;line-height:1.42857;vertical-align:top;border-top-width:1px;border-top-color:#dddddd;border-top-style:solid;padding:8px"><%=issue.summary%></td>
         </tr>
       <% end %>
       </tbody>

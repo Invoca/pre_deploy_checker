@@ -34,7 +34,7 @@ describe Jira::Status::PushController, type: :controller do
     end
 
     it 'doesnt send an email and returns success if email has already been sent' do
-      @push.update_attributes(email_sent: true)
+      @push.update(email_sent: true)
       get :deploy_email, params: { id: '12345678', service_name: 'rs_west' }
       expect(response).to have_http_status(302)
       expect(flash[:alert]).to match(/Email was already sent/)
