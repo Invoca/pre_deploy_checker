@@ -3,11 +3,16 @@
 require 'spec_helper'
 
 describe 'PushChangeHandler' do
-  let(:payload) { Github::Api::PushHookPayload.new(load_json_fixture('github_push_payload')) }
-  let(:push) { Push.create_from_github_data!(payload).first }
+  let(:rails_env) { 'production' }
+  let(:payload)   { Github::Api::PushHookPayload.new(load_json_fixture('github_push_payload')) }
+  let(:push)      { Push.create_from_github_data!(payload).first }
 
   before(:all) do
     Service.find_or_create_by!(name: 'web')
+  end
+
+  before do
+    allow(Rails).to receive(:env).and_return(rails_env)
   end
 
   def mock_status_request(state, description)
@@ -33,42 +38,74 @@ describe 'PushChangeHandler' do
   end
 
   context 'when service is web' do
-    it 'sets GitHub push and push model status when submitted for processing' do
-      mock_status_request(
-        Github::Api::Status::STATE_PENDING,
-        PushChangeHandler::STATE_DESCRIPTIONS[Github::Api::Status::STATE_PENDING]
-      )
+    context 'when in production' do
+      it 'sets GitHub push and push model status when submitted for processing' do
+        mock_status_request(
+          Github::Api::Status::STATE_PENDING,
+          PushChangeHandler::STATE_DESCRIPTIONS[Github::Api::Status::STATE_PENDING]
+        )
 
-      push.status = Github::Api::Status::STATE_FAILED
-      push.save!
-      PushChangeHandler.new.submit_push_for_processing!(push)
-
-      # a job should be queued
-      expect(Delayed::Job.count).to eq(1)
-
-      # the model status should be updated
-      expect(push.reload.status).to eq(Github::Api::Status::STATE_PENDING.to_s)
-    end
-
-    it 'sets GitHub push status after processing' do
-      mock_status_request(
-        Github::Api::Status::STATE_SUCCESS,
-        PushChangeHandler::STATE_DESCRIPTIONS[Github::Api::Status::STATE_SUCCESS]
-      )
-
-      expect(PushManager).to receive(:process_push!) do |push|
-        push.status = Github::Api::Status::STATE_SUCCESS.to_s
+        push.status = Github::Api::Status::STATE_FAILED
         push.save!
-        push
+        PushChangeHandler.new.submit_push_for_processing!(push)
+
+        # a job should be queued
+        expect(Delayed::Job.count).to eq(1)
+
+        # the model status should be updated
+        expect(push.reload.status).to eq(Github::Api::Status::STATE_PENDING.to_s)
       end
 
-      PushChangeHandler.new.process_push!(push.id)
+      it 'sets GitHub push status after processing' do
+        mock_status_request(
+          Github::Api::Status::STATE_SUCCESS,
+          PushChangeHandler::STATE_DESCRIPTIONS[Github::Api::Status::STATE_SUCCESS]
+        )
 
-      # a job should be queued
-      expect(Delayed::Job.count).to eq(1)
+        expect(PushManager).to receive(:process_push!) do |push|
+          push.status = Github::Api::Status::STATE_SUCCESS.to_s
+          push.save!
+          push
+        end
 
-      # process the job
-      expect(Delayed::Worker.new.work_off).to eq([1, 0])
+        PushChangeHandler.new.process_push!(push.id)
+
+        # a job should be queued
+        expect(Delayed::Job.count).to eq(1)
+
+        # process the job
+        expect(Delayed::Worker.new.work_off).to eq([1, 0])
+      end
+    end
+
+    context 'when in staging' do
+      let(:rails_env) { 'staging' }
+
+      it 'should not set GitHub status when push is submitted for processing' do
+        api = instance_double(Github::Api::Status)
+        expect(api).to_not receive(:set_status)
+
+        PushChangeHandler.new.submit_push_for_processing!(push)
+      end
+
+      it 'should not set GitHub status when push is done processing' do
+        api = instance_double(Github::Api::Status)
+        expect(api).to_not receive(:set_status)
+
+        expect(PushManager).to receive(:process_push!) do |push|
+          push.status = Github::Api::Status::STATE_SUCCESS.to_s
+          push.save!
+          push
+        end
+
+        PushChangeHandler.new.process_push!(push.id)
+
+        # a job should be queued
+        expect(Delayed::Job.count).to eq(1)
+
+        # process the job
+        expect(Delayed::Worker.new.work_off).to eq([1, 0])
+      end
     end
   end
 

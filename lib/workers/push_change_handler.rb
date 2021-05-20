@@ -3,8 +3,8 @@
 class PushChangeHandler
   include Rails.application.routes.url_helpers
 
-  PROCESSING_QUEUE = 'push_handler'
-  CONTEXT_NAME = 'Pre-Deploy Checker'
+  PROCESSING_QUEUE   = 'push_handler'
+  CONTEXT_NAME       = 'Pre-Deploy Checker'
   STATE_DESCRIPTIONS = {
     Github::Api::Status::STATE_PENDING => 'Processing...',
     Github::Api::Status::STATE_SUCCESS => 'OK to deploy',
@@ -28,7 +28,7 @@ class PushChangeHandler
   private
 
   def set_status_for_push!(push) # rubocop:disable Naming/AccessorMethodName
-    if push.service_name == "web"
+    if Rails.env == 'production' && push.service_name == "web"
       api = Github::Api::Status.new(Rails.application.secrets.github_user_name,
                                     Rails.application.secrets.github_password)
       api.set_status(push.branch.repository.name,
