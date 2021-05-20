@@ -16,9 +16,11 @@ development:
 staging:
   adapter: mysql2
   pool: 5
+  ssl_mode: required
   url: <%= ENV['DATABASE_URL'] %>
 
 production:
   adapter: mysql2
   pool: 5
+  ssl_mode: required
   url: <%= ENV['DATABASE_URL'] %>
