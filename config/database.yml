@@ -13,6 +13,11 @@ development:
   <<: *default
   database: predeploychecker_dev
 
+staging:
+  adapter: mysql2
+  pool: 5
+  url: <%= ENV['DATABASE_URL'] %>
+
 production:
   adapter: mysql2
   pool: 5
